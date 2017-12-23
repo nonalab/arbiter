@@ -1,0 +1,40 @@
+{
+  "usdValue": 194814.01,
+  "watchingPairs": [
+    "ETHUSD",
+    "BTCUSD",
+    "BCCUSD",
+    "BCHUSD",
+    "CVCUSD"
+  ],
+  "asset": {
+    "USD": {
+      "amount": 25413.820000000007
+    },
+    "BTC": {
+      "amount": 12,
+      "ask": 14067.37,
+      "bid": 14059.58
+    },
+    "BCC": {
+      "amount": 0,
+      "ask": 295.4,
+      "bid": 285.9
+    },
+    "ETH": {
+      "amount": 1,
+      "ask": 686.76,
+      "bid": 685.23
+    },
+    "BCH": {
+      "amount": 0,
+      "ask": 2661.39985,
+      "bid": 2658.39072
+    },
+    "CVC": {
+      "amount": 0,
+      "ask": 0.5987,
+      "bid": 0.558
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "arbiter-core",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "babel-node src/index.js",
+    "build": "babel src -d lib",
+    "test": "chokidar './src/**/*.js' -c 'npm start'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "LAB",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1"
+  },
+  "dependencies": {
+    "arbiter-model": "^1.0.0",
+    "arbiter-x-hitbtc": "^1.0.0",
+    "bufferutil": "^3.0.3",
+    "chokidar-cli": "^1.2.0",
+    "fs-extra": "^4.0.2",
+    "utf-8-validate": "^3.0.4",
+    "ws": "^3.3.1"
+  }
+}

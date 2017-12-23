@@ -1,4 +1,4 @@
-import TPCExchangeHitBTC from '../src';
+import ArbiterExchangeBitFinex from '../src';
 
 import creds from '../credentials.json';
 
@@ -18,27 +18,24 @@ function otherListener(respJSON) {
 /*
 {"channel":"ticker","type":"update","data":{"ask":"0.053440","bid":"0.053341","last":"0.053445","open":"0.049779","low":"0.046764","high":"0.054361","volume":"115040.853","volumeQuote":"5872.911384124","timestamp":"2017-11-13T02:45:14.146Z","symbol":"ETHBTC"}}
 */
-function tickerListener ({ask, bid, symbol, time}) {
-	taggedLog(`TICKER - ${symbol}`, `ASK: ${ask} - BID: ${bid} - TIME: ${time}`)
+function tickerListener ({ask, bid, symbol, timestamp}) {
+	taggedLog(`TICKER - ${symbol}`, `ASK: ${ask} - BID: ${bid} - TIME: ${timestamp}`)
 }
 
 async function main(){
-	const hitBTCInstance = new TPCExchangeHitBTC({
-		tickerListener,
-		authListener,
-		otherListener
-	});
+	const bitFinexInstance = new ArbiterExchangeBitFinex();
 
-	hitBTCInstance
+	bitFinexInstance
 		.on('auth', authListener)
 		.on('other', otherListener)
 		.on('ticker', tickerListener)
 
-	await hitBTCInstance.open();
+	await bitFinexInstance.open();
 
-	hitBTCInstance.authenticate(creds);
+	bitFinexInstance.authenticate(creds);
 
-	hitBTCInstance.subscribeToTicker()
+	bitFinexInstance.subscribeToTicker()
+	bitFinexInstance.subscribeToTicker('BTCUSD')
 }
 
 main();

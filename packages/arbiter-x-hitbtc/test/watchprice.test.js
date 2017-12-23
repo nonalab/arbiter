@@ -23,11 +23,7 @@ function tickerListener ({ask, bid, symbol, time}) {
 }
 
 async function main(){
-	const hitBTCInstance = new TPCExchangeHitBTC({
-		tickerListener,
-		authListener,
-		otherListener
-	});
+	const hitBTCInstance = new TPCExchangeHitBTC();
 
 	hitBTCInstance
 		.on('auth', authListener)

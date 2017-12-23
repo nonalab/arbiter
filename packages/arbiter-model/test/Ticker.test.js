@@ -9,7 +9,6 @@ test('Create ticker', t => {
 		ask: 0,
 		bid: 1,
 		last: 2,
-		open: 3,
 		low: 4,
 		high: 5,
 		symbol: 'A'

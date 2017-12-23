@@ -12,11 +12,11 @@ var Ticker = exports.Ticker = function Ticker(_ref) {
         ask = _ref.ask,
         bid = _ref.bid,
         last = _ref.last,
-        open = _ref.open,
         low = _ref.low,
         high = _ref.high,
-        _ref$time = _ref.time,
-        time = _ref$time === undefined ? Date.now() : _ref$time;
+        volume = _ref.volume,
+        _ref$timestamp = _ref.timestamp,
+        timestamp = _ref$timestamp === undefined ? Date.now() : _ref$timestamp;
 
     _classCallCheck(this, Ticker);
 
@@ -24,8 +24,8 @@ var Ticker = exports.Ticker = function Ticker(_ref) {
     this.ask = ask;
     this.bid = bid;
     this.last = last;
-    this.open = open;
     this.low = low;
     this.high = high;
-    this.time = new Date(time);
+    this.volume = volume;
+    this.timestamp = new Date(timestamp);
 };

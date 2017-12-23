@@ -7,6 +7,7 @@ export const EVENT_ID = {
 export default class ResponseHandler {
 	constructor(event) {
 		this.event = event;
+		this.eventId = Object.assign({}, EVENT_ID);
 	}
 
 	balance(data) {
@@ -26,12 +27,12 @@ export default class ResponseHandler {
 		}
 
 		switch(id) {
-		case EVENT_ID.balance:
+		case this.eventId.balance:
 			{
 				this.balance(result)
 				return true;
 			}
-		case EVENT_ID.auth:
+		case this.eventId.auth:
 			{
 				this.auth(result)
 				return true;

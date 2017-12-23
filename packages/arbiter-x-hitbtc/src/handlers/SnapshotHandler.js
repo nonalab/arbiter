@@ -1,12 +1,12 @@
-const METHOD_ID = {
-	ticker: 'ticker'
-}
+import {Ticker} from 'arbiter-model';
 
-import Ticker from '../models/Ticker';
-
-export default class NotificationHandler {
+export default class SnapshotHandler {
 	constructor(event) {
 		this.event = event;
+
+		this.methodId = {
+			ticker: 'ticker'
+		}
 	}
 
 	ticker(data) {
@@ -22,7 +22,7 @@ export default class NotificationHandler {
 		}
 
 		switch(method) {
-		case METHOD_ID.ticker:
+		case this.methodId.ticker:
 			{
 				this.ticker(params);
 				return true;

@@ -1,31 +1,45 @@
 import WebSocket from 'ws';
 import crypto from 'crypto-js';
 
-const baseUrl = 'wss://api.bitfinex.com/ws/2';
+import SnapshotHandler from './handlers/SnapshotHandler';
 
-export default class ArbiterExchangeHitBTC {
+const EVENTS = ['auth', 'ticker', 'balance', 'close', 'other']
 
-	constructor({
-		authListener = ()=>{},
-		tickerListener = ()=>{},
-		balanceListener = ()=>{},
-		closeListener = ()=>{},
-		otherListener = ()=>{}
-	}) {
+export default class ArbiterExchangeBitFinex {
+
+	constructor(baseUrl = 'wss://api.bitfinex.com/ws/2') {
+		this.event = {}
+
+		EVENTS.map(name => this.event[name] = () => {})
 
 		const wsClient = this.wsClient = new WebSocket(baseUrl, {
 			perMessageDeflate: false
 		});
 
+		const snapshotHandler = new SnapshotHandler(this.event);
+		
 		// Handle message and ping the appropriate
 		// litener from the container
 		wsClient.on('message', (resp) => {
 			const respJSON = JSON.parse(resp);
 
-			otherListener(resp);
+			if (respJSON.event) {
+				snapshotHandler.register(respJSON);
+				return;
+			}
+
+			if(snapshotHandler.evaluate(respJSON))
+				return;
+
+			this.event['other'](respJSON)
 		})
 
-		wsClient.on('close', closeListener)
+		wsClient.on('close', this.event['close'])
+	}
+
+	on(eventName, callback) {
+		this.event[eventName] = callback;
+		return this;
 	}
 
 	async open(){
@@ -37,12 +51,12 @@ export default class ArbiterExchangeHitBTC {
 		});
 	}
 
-	subscribeToTicker(oSymbol="ETHUSD") {
+	subscribeToTicker(rawSymbol="ETHUSD") {
 		const event = "subscribe";
 
 		const channel = "ticker";
 
-		const symbol = `t${oSymbol}`;
+		const symbol = `t${rawSymbol}`;
 
 		const socketMessage = {event, channel, symbol}
 

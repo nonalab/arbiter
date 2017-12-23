@@ -10,13 +10,9 @@ var _ws = require('ws');
 
 var _ws2 = _interopRequireDefault(_ws);
 
-var _crypto = require('crypto');
+var _cryptoJs = require('crypto-js');
 
-var _crypto2 = _interopRequireDefault(_crypto);
-
-var _ResponseHandler = require('./handlers/ResponseHandler');
-
-var _ResponseHandler2 = _interopRequireDefault(_ResponseHandler);
+var _cryptoJs2 = _interopRequireDefault(_cryptoJs);
 
 var _SnapshotHandler = require('./handlers/SnapshotHandler');
 
@@ -30,13 +26,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var EVENTS = ['auth', 'ticker', 'balance', 'close', 'other'];
 
-var ArbiterExchangeHitBTC = function () {
-	function ArbiterExchangeHitBTC() {
+var ArbiterExchangeBitFinex = function () {
+	function ArbiterExchangeBitFinex() {
 		var _this = this;
 
-		var baseUrl = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'wss://api.hitbtc.com/api/2/ws';
+		var baseUrl = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'wss://api.bitfinex.com/ws/2';
 
-		_classCallCheck(this, ArbiterExchangeHitBTC);
+		_classCallCheck(this, ArbiterExchangeBitFinex);
 
 		this.event = {};
 
@@ -48,8 +44,6 @@ var ArbiterExchangeHitBTC = function () {
 			perMessageDeflate: false
 		});
 
-		var responseHandler = new _ResponseHandler2.default(this.event);
-
 		var snapshotHandler = new _SnapshotHandler2.default(this.event);
 
 		// Handle message and ping the appropriate
@@ -57,7 +51,10 @@ var ArbiterExchangeHitBTC = function () {
 		wsClient.on('message', function (resp) {
 			var respJSON = JSON.parse(resp);
 
-			if (responseHandler.evaluate(respJSON)) return;
+			if (respJSON.event) {
+				snapshotHandler.register(respJSON);
+				return;
+			}
 
 			if (snapshotHandler.evaluate(respJSON)) return;
 
@@ -67,7 +64,7 @@ var ArbiterExchangeHitBTC = function () {
 		wsClient.on('close', this.event['close']);
 	}
 
-	_createClass(ArbiterExchangeHitBTC, [{
+	_createClass(ArbiterExchangeBitFinex, [{
 		key: 'on',
 		value: function on(eventName, callback) {
 			this.event[eventName] = callback;
@@ -106,16 +103,15 @@ var ArbiterExchangeHitBTC = function () {
 	}, {
 		key: 'subscribeToTicker',
 		value: function subscribeToTicker() {
-			var symbol = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "ETHUSD";
+			var rawSymbol = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "ETHUSD";
 
-			var method = "subscribeTicker";
+			var event = "subscribe";
 
-			var socketMessage = {
-				method: method,
-				params: {
-					symbol: symbol
-				}
-			};
+			var channel = "ticker";
+
+			var symbol = 't' + rawSymbol;
+
+			var socketMessage = { event: event, channel: channel, symbol: symbol };
 
 			this.wsClient.send(JSON.stringify(socketMessage));
 		}
@@ -125,33 +121,29 @@ var ArbiterExchangeHitBTC = function () {
 			var key = _ref2.key,
 			    secret = _ref2.secret;
 
-			var id = _ResponseHandler.EVENT_ID.auth;
+			var event = "auth";
 
 			var method = "login";
 
-			var algo = "HS256";
-
-			// Authentication using sha256 is something boggling :O
 			var nonce = Date.now() + Math.random().toString();
 
-			var signature = _crypto2.default.createHmac('sha256', secret).update(nonce).digest('hex');
+			var payload = 'AUTH' + nonce;
+
+			var signature = _cryptoJs2.default.HmacSHA384(payload, secret).toString(_cryptoJs2.default.enc.Hex);
 
 			var socketMessage = {
-				method: method,
-				params: {
-					algo: algo,
-					pKey: key,
-					nonce: nonce,
-					signature: signature
-				},
-				id: id
+				event: event,
+				apiKey: key,
+				authSig: signature,
+				authNonce: nonce,
+				authPayload: payload
 			};
 
 			this.wsClient.send(JSON.stringify(socketMessage));
 		}
 	}]);
 
-	return ArbiterExchangeHitBTC;
+	return ArbiterExchangeBitFinex;
 }();
 
-exports.default = ArbiterExchangeHitBTC;
+exports.default = ArbiterExchangeBitFinex;

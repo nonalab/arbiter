@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "arbiter-model": "^1.0.0",
+    "arbiter-x-bitfinex": "^1.0.0",
     "arbiter-x-hitbtc": "^1.0.0",
     "bufferutil": "^3.0.3",
     "chokidar-cli": "^1.2.0",

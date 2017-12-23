@@ -5,15 +5,13 @@ import ResponseHandler, {
 	EVENT_ID
 } from './handlers/ResponseHandler';
 
-import NotificationHandler from './handlers/NotificationHandler';
-
-const baseUrl = 'wss://api.hitbtc.com/api/2/ws';
+import SnapshotHandler from './handlers/SnapshotHandler';
 
 const EVENTS = ['auth', 'ticker', 'balance', 'close', 'other']
 
 export default class ArbiterExchangeHitBTC {
 
-	constructor() {
+	constructor(baseUrl = 'wss://api.hitbtc.com/api/2/ws') {
 		this.event = {}
 
 		EVENTS.map(name => this.event[name] = () => {})
@@ -24,7 +22,7 @@ export default class ArbiterExchangeHitBTC {
 
 		const responseHandler = new ResponseHandler(this.event);
 
-		const notificationHandler = new NotificationHandler(this.event);
+		const snapshotHandler = new SnapshotHandler(this.event);
 
 		// Handle message and ping the appropriate
 		// litener from the container
@@ -34,7 +32,7 @@ export default class ArbiterExchangeHitBTC {
 			if(responseHandler.evaluate(respJSON))
 				return;
 
-			if(notificationHandler.evaluate(respJSON))
+			if(snapshotHandler.evaluate(respJSON))
 				return;
 
 			this.event['other'](respJSON)
@@ -59,7 +57,7 @@ export default class ArbiterExchangeHitBTC {
 		});
 	}
 
-	subscribeToTicker(symbol = "ETHBTC") {
+	subscribeToTicker(symbol = "ETHUSD") {
 		const method = "subscribeTicker";
 
 		const socketMessage = {

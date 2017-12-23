@@ -18,10 +18,6 @@ var SnapshotHandler = function () {
 
 		this.event = event;
 
-		this.channelType = {
-			ticker: 'ticker'
-		};
-
 		this.channelMap = {};
 	}
 
@@ -78,15 +74,13 @@ var SnapshotHandler = function () {
 			    pair = _channelMap$chanId.pair;
 
 
-			switch (channel) {
-				case this.channelType.ticker:
-					{
-						this.ticker(pair, data);
-						return true;
-					}
-				default:
-					return false;
+			if (!this[channel]) {
+				return false;
 			}
+
+			this[channel](pair, data);
+
+			return true;
 		}
 	}]);
 

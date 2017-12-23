@@ -98,9 +98,9 @@ var _arbiterStore = require('arbiter-store');
 
 var _arbiterStore2 = _interopRequireDefault(_arbiterStore);
 
-var _main = require('./main');
+var _arbiterUtils = require('arbiter-utils');
 
-var _utils = require('./utils');
+var _main = require('./main');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 

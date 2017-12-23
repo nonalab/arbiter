@@ -129,10 +129,13 @@ var ArbiterExchangeBitFinex = function () {
 
 			var payload = 'AUTH' + nonce;
 
+			var filter = ['trading', 'wallet', 'balance'];
+
 			var signature = _cryptoJs2.default.HmacSHA384(payload, secret).toString(_cryptoJs2.default.enc.Hex);
 
 			var socketMessage = {
 				event: event,
+				filter: filter,
 				apiKey: key,
 				authSig: signature,
 				authNonce: nonce,

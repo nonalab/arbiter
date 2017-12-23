@@ -1,21 +1,17 @@
 {
-  "name": "arbiter-model",
+  "name": "arbiter-utils",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "babel src -d lib",
-    "test": "ava"
+    "start": "babel-node src/index.js",
+    "build": "babel src -d lib"
   },
   "keywords": [],
   "author": "@louisgv",
-  "license": "ISC",
+  "license": "LAB",
   "devDependencies": {
-    "ava": "^0.24.0",
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.6.1"
-  },
-  "dependencies": {
-    "arbiter-utils": "^1.0.0"
   }
 }

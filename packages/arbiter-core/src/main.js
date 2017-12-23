@@ -1,6 +1,6 @@
 import {
 	wait
-} from './utils';
+} from 'arbiter-utils';
 
 /**
     Skeleton for a program that run forever

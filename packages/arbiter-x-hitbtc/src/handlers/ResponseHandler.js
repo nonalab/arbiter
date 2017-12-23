@@ -1,7 +1,8 @@
 export const EVENT_ID = {
 	// Response events, ID matters
 	balance: 0,
-	auth: 1
+	auth: 1,
+	newOrder: 2
 }
 
 export default class ResponseHandler {

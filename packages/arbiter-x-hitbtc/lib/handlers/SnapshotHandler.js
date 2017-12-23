@@ -15,11 +15,12 @@ var SnapshotHandler = function () {
 		_classCallCheck(this, SnapshotHandler);
 
 		this.event = event;
-
-		this.methodId = {
-			ticker: 'ticker'
-		};
 	}
+
+	/*
+ {"channel":"ticker","type":"update","data":{"ask":"0.053440","bid":"0.053341","last":"0.053445","open":"0.049779","low":"0.046764","high":"0.054361","volume":"115040.853","volumeQuote":"5872.911384124","timestamp":"2017-11-13T02:45:14.146Z","symbol":"ETHBTC"}}
+ */
+
 
 	_createClass(SnapshotHandler, [{
 		key: 'ticker',
@@ -27,24 +28,23 @@ var SnapshotHandler = function () {
 			this.event['ticker'](new _arbiterModel.Ticker(data));
 		}
 	}, {
+		key: 'activeOrders',
+		value: function activeOrders(data) {
+			this.event['order'](data);
+		}
+	}, {
 		key: 'evaluate',
 		value: function evaluate(_ref) {
 			var method = _ref.method,
 			    params = _ref.params;
 
-			if (!method) {
+			if (!method || !this[method]) {
 				return false;
 			}
 
-			switch (method) {
-				case this.methodId.ticker:
-					{
-						this.ticker(params);
-						return true;
-					}
-				default:
-					return false;
-			}
+			this[method](params);
+
+			return true;
 		}
 	}]);
 

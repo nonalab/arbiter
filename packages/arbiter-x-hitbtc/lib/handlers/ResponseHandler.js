@@ -11,7 +11,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var EVENT_ID = exports.EVENT_ID = {
 	// Response events, ID matters
 	balance: 0,
-	auth: 1
+	auth: 1,
+	newOrder: 2
 };
 
 var ResponseHandler = function () {

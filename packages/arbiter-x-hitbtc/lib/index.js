@@ -28,7 +28,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var EVENTS = ['auth', 'ticker', 'balance', 'close', 'other'];
+var EVENTS = ['auth', 'order', 'ticker', 'balance', 'close', 'other'];
 
 var ArbiterExchangeHitBTC = function () {
 	function ArbiterExchangeHitBTC() {
@@ -103,6 +103,18 @@ var ArbiterExchangeHitBTC = function () {
 
 			return open;
 		}()
+	}, {
+		key: 'subscribeToReports',
+		value: function subscribeToReports() {
+			var method = "subscribeReports";
+
+			var socketMessage = {
+				method: method,
+				params: {}
+			};
+
+			this.wsClient.send(JSON.stringify(socketMessage));
+		}
 	}, {
 		key: 'subscribeToTicker',
 		value: function subscribeToTicker() {

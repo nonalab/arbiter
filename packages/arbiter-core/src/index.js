@@ -3,13 +3,12 @@ import ArbiterExchangeHitBTC from 'arbiter-x-hitbtc';
 import ArbiterStore from 'arbiter-store';
 
 import {
-	foreverProcess
-} from './main';
+	taggedLog
+} from 'arbiter-utils';
 
 import {
-	wait,
-	taggedLog
-} from './utils';
+	foreverProcess
+} from './main';
 
 const UPDATE_INTERVAL = 500;
 

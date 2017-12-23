@@ -7,7 +7,7 @@ import ResponseHandler, {
 
 import SnapshotHandler from './handlers/SnapshotHandler';
 
-const EVENTS = ['auth', 'ticker', 'balance', 'close', 'other']
+const EVENTS = ['auth', 'order', 'ticker', 'balance', 'close', 'other']
 
 export default class ArbiterExchangeHitBTC {
 
@@ -55,6 +55,17 @@ export default class ArbiterExchangeHitBTC {
 				resolve()
 			})
 		});
+	}
+
+	subscribeToReports() {
+		const method = "subscribeReports";
+
+		const socketMessage = {
+			method,
+			params: {}
+		}
+
+		this.wsClient.send(JSON.stringify(socketMessage))
 	}
 
 	subscribeToTicker(symbol = "ETHUSD") {

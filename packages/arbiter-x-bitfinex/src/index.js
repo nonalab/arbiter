@@ -72,12 +72,19 @@ export default class ArbiterExchangeBitFinex {
 
 		const payload = 'AUTH' + nonce;
 
+		const filter = [
+			'trading',
+			'wallet',
+			'balance'
+		]
+
 		const signature = crypto
 			.HmacSHA384(payload, secret)
 			.toString(crypto.enc.Hex)
 
 		const socketMessage = {
 			event,
+			filter,
 			apiKey: key,
 			authSig: signature,
 			authNonce: nonce,

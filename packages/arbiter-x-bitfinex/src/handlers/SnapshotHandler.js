@@ -3,11 +3,7 @@ import {Ticker} from 'arbiter-model';
 export default class SnapshotHandler {
 	constructor(event) {
 		this.event = event;
-
-		this.channelType = {
-			ticker: 'ticker'
-		}
-
+		
 		this.channelMap = {}
 	}
 
@@ -44,14 +40,12 @@ export default class SnapshotHandler {
 			pair
 		} = this.channelMap[chanId];
 
-		switch(channel) {
-		case this.channelType.ticker:
-			{
-				this.ticker(pair, data);
-				return true;
-			}
-		default:
+		if (!this[channel]) {
 			return false;
 		}
+
+		this[channel](pair, data);
+
+		return true;
 	}
 }

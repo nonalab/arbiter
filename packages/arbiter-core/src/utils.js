@@ -8,9 +8,6 @@ export async function wait(duration) {
 }
 
 export function taggedLog(tag, info) {
-
-	return;
-
 	console.log(` --- --- --- --- ${tag} --- --- --- --- ----`);
 	console.log(info);
 }

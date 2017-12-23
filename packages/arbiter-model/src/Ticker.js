@@ -4,12 +4,12 @@ export class Ticker {
         symbol, ask, bid, last, low, high, volume, timestamp = Date.now()
     }) {
         this.symbol = symbol;
-        this.ask = ask;
-        this.bid = bid;
-        this.last = last;
-        this.low = low;
-        this.high = high;
-        this.volume = volume;
+        this.ask = Number(ask);
+        this.bid = Number(bid);
+        this.last = Number(last);
+        this.low = Number(low);
+        this.high = Number(high);
+        this.volume = Number(volume);
         this.timestamp = new Date(timestamp);
     }
 

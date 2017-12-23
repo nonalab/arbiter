@@ -17,7 +17,7 @@ export default class ArbiterExchangeBitFinex {
 		});
 
 		const snapshotHandler = new SnapshotHandler(this.event);
-		
+
 		// Handle message and ping the appropriate
 		// litener from the container
 		wsClient.on('message', (resp) => {

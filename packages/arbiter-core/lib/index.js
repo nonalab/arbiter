@@ -1,43 +1,36 @@
 'use strict';
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 var init = function () {
 	var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
-		var bitFinexInstance, hitBTCInstance, _ref2, _ref3, data;
-
 		return regeneratorRuntime.wrap(function _callee$(_context) {
 			while (1) {
 				switch (_context.prev = _context.next) {
 					case 0:
-						console.log('INIT |||');
-						bitFinexInstance = new _arbiterXBitfinex2.default();
-						hitBTCInstance = new _arbiterXHitbtc2.default();
-						_context.next = 5;
-						return Promise.all([_fsExtra2.default.readJson(dbPath), bitFinexInstance.open(), hitBTCInstance.open()]);
+						console.log('Initializing ... ');
 
-					case 5:
-						_ref2 = _context.sent;
-						_ref3 = _slicedToArray(_ref2, 1);
-						data = _ref3[0];
+						_context.next = 3;
+						return Promise.all([store.init(), bitFinexInstance.open(), hitBTCInstance.open()]);
 
+					case 3:
 
-						hitBTCInstance.authenticate(_credentials2.default.hitbtc);
-						bitFinexInstance.authenticate(_credentials2.default.bitfinex);
+						hitBTCInstance.authenticate(store.credential.hitbtc);
+						bitFinexInstance.authenticate(store.credential.bitfinex);
 
-						data.watchingPairs.map(function (pair) {
+						store.pairs.map(function (pair) {
 							hitBTCInstance.subscribeToTicker(pair);
 							bitFinexInstance.subscribeToTicker(pair);
 						});
 
 						hitBTCInstance.on('ticker', function (ticker) {
-							return tickerListener('HITBTC', ticker);
+							return tickerListener('hitbtc', ticker);
 						});
 						bitFinexInstance.on('ticker', function (ticker) {
-							return tickerListener('BITFIN', ticker);
+							return tickerListener('bitfinex', ticker);
 						});
 
-					case 13:
+						console.log('Done! Program is running ... ');
+
+					case 9:
 					case 'end':
 						return _context.stop();
 				}
@@ -51,14 +44,15 @@ var init = function () {
 }();
 
 var update = function () {
-	var _ref4 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+	var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
 		return regeneratorRuntime.wrap(function _callee2$(_context2) {
 			while (1) {
 				switch (_context2.prev = _context2.next) {
 					case 0:
-						console.log('UPDATE >>>');
+						_context2.next = 2;
+						return store.log('price');
 
-					case 1:
+					case 2:
 					case 'end':
 						return _context2.stop();
 				}
@@ -67,12 +61,12 @@ var update = function () {
 	}));
 
 	return function update() {
-		return _ref4.apply(this, arguments);
+		return _ref2.apply(this, arguments);
 	};
 }();
 
 var exit = function () {
-	var _ref5 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+	var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
 		return regeneratorRuntime.wrap(function _callee3$(_context3) {
 			while (1) {
 				switch (_context3.prev = _context3.next) {
@@ -88,21 +82,9 @@ var exit = function () {
 	}));
 
 	return function exit() {
-		return _ref5.apply(this, arguments);
+		return _ref3.apply(this, arguments);
 	};
 }();
-
-var _path = require('path');
-
-var _path2 = _interopRequireDefault(_path);
-
-var _fsExtra = require('fs-extra');
-
-var _fsExtra2 = _interopRequireDefault(_fsExtra);
-
-var _main = require('./main');
-
-var _utils = require('./utils');
 
 var _arbiterXBitfinex = require('arbiter-x-bitfinex');
 
@@ -112,17 +94,23 @@ var _arbiterXHitbtc = require('arbiter-x-hitbtc');
 
 var _arbiterXHitbtc2 = _interopRequireDefault(_arbiterXHitbtc);
 
-var _credentials = require('../credentials.json');
+var _arbiterStore = require('arbiter-store');
 
-var _credentials2 = _interopRequireDefault(_credentials);
+var _arbiterStore2 = _interopRequireDefault(_arbiterStore);
+
+var _main = require('./main');
+
+var _utils = require('./utils');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
-var dbPath = _path2.default.resolve(__dirname, '../db.json');
-
 var UPDATE_INTERVAL = 500;
+
+var bitFinexInstance = new _arbiterXBitfinex2.default();
+var hitBTCInstance = new _arbiterXHitbtc2.default();
+var store = new _arbiterStore2.default();
 
 (0, _main.foreverProcess)({
 	init: init,
@@ -130,11 +118,19 @@ var UPDATE_INTERVAL = 500;
 	exit: exit
 }, UPDATE_INTERVAL);
 
-function tickerListener(exchange, _ref6) {
-	var ask = _ref6.ask,
-	    bid = _ref6.bid,
-	    symbol = _ref6.symbol,
-	    time = _ref6.time;
+function tickerListener(exchange, _ref4) {
+	var ask = _ref4.ask,
+	    bid = _ref4.bid,
+	    symbol = _ref4.symbol;
 
-	(0, _utils.taggedLog)('TICKER - ' + exchange + ' - ' + symbol, 'ASK: ' + ask + ' - BID: ' + bid + ' - TIME: ' + time);
+	// taggedLog(`TICKER - ${exchange} - ${symbol}`, `ASK: ${ask} - BID: ${bid} - TIME: ${timestamp}`)
+	var currency = symbol.slice(0, -3);
+	updatePrice(currency, exchange, ask, bid);
+}
+
+function updatePrice(currency, exchange, ask, bid) {
+	if (!store.price[currency]) {
+		store.price[currency] = {};
+	}
+	store.price[currency][exchange] = { ask: ask, bid: bid };
 }

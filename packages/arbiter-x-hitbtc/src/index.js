@@ -1,5 +1,6 @@
-import WebSocket from 'ws';
+import EventEmitter from 'events';
 import crypto from 'crypto';
+import WebSocket from 'ws';
 
 import ResponseHandler, {
 	EVENT_ID
@@ -9,20 +10,18 @@ import SnapshotHandler from './handlers/SnapshotHandler';
 
 const EVENTS = ['auth', 'order', 'ticker', 'balance', 'close', 'other']
 
-export default class ArbiterExchangeHitBTC {
+export default class ArbiterExchangeHitBTC extends EventEmitter {
 
 	constructor(baseUrl = 'wss://api.hitbtc.com/api/2/ws') {
-		this.event = {}
-
-		EVENTS.map(name => this.event[name] = () => {})
+		super()
 
 		const wsClient = this.wsClient = new WebSocket(baseUrl, {
 			perMessageDeflate: false
 		});
 
-		const responseHandler = new ResponseHandler(this.event);
+		const responseHandler = new ResponseHandler(this);
 
-		const snapshotHandler = new SnapshotHandler(this.event);
+		const snapshotHandler = new SnapshotHandler(this);
 
 		// Handle message and ping the appropriate
 		// litener from the container
@@ -35,15 +34,10 @@ export default class ArbiterExchangeHitBTC {
 			if(snapshotHandler.evaluate(respJSON))
 				return;
 
-			this.event['other'](respJSON)
+			this.emit('other', respJSON)
 		})
 
-		wsClient.on('close', this.event['close'])
-	}
-
-	on(eventName, callback) {
-		this.event[eventName] = callback;
-		return this;
+		wsClient.on('close', () => this.emit('close'))
 	}
 
 	async open() {
@@ -51,12 +45,11 @@ export default class ArbiterExchangeHitBTC {
 			wsClient
 		} = this;
 		return new Promise(function (resolve, reject) {
-			wsClient.on('open', () => {
-				resolve()
-			})
+			wsClient.on('open', () => resolve())
 		});
 	}
 
+	/* Streaming APIs: */
 	subscribeToReports() {
 		const method = "subscribeReports";
 
@@ -81,7 +74,58 @@ export default class ArbiterExchangeHitBTC {
 		this.wsClient.send(JSON.stringify(socketMessage))
 	}
 
-	authenticate({
+	/* REST-like APIs: */
+	sendRequest(socketMessage) {
+		this.wsClient.send(JSON.stringify(socketMessage))
+	}
+
+	requestBuyOrder(clientOrderId, symbol, price, quantity) {
+		this.sendRequest({
+			id: EVENT_ID.sell,
+			method: "newOrder",
+			params: {
+				side: "buy",
+				clientOrderId,
+				symbol,
+				price,
+				quantity,
+			}
+		})
+	}
+
+	requestSellOrder(clientOrderId, symbol, price, quantity) {
+		this.sendRequest({
+			id: EVENT_ID.sell,
+			method: "newOrder",
+			params: {
+				side: "sell",
+				clientOrderId,
+				symbol,
+				price,
+				quantity,
+			}
+		})
+	}
+
+	requestCancelOrder(clientOrderId) {
+		this.sendRequest({
+			id: EVENT_ID.cancel,
+			method: "cancelOrder",
+			params: {
+				clientOrderId
+			}
+		})
+	}
+
+	requestTradingBalance() {
+		this.sendRequest({
+			id: EVENT_ID.balance,
+			method: "getTradingBalance",
+			params: {}
+		})
+	}
+
+	async authenticate({
 		key,
 		secret
 	}) {
@@ -99,18 +143,22 @@ export default class ArbiterExchangeHitBTC {
 			.update(nonce)
 			.digest('hex');
 
-		const socketMessage = {
+		this.sendRequest({
+			id,
 			method,
 			params: {
 				algo,
 				pKey: key,
 				nonce,
-				signature
+				signature,
 			},
-			id
-		}
+		})
 
-		this.wsClient.send(JSON.stringify(socketMessage))
+		const self = this;
+
+		return new Promise(function (resolve, reject) {
+			self.on('auth', data => data ? resolve() : reject())
+		});
 	}
 
 }

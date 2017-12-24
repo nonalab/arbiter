@@ -6,13 +6,17 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _ws = require('ws');
+var _events = require('events');
 
-var _ws2 = _interopRequireDefault(_ws);
+var _events2 = _interopRequireDefault(_events);
 
 var _crypto = require('crypto');
 
 var _crypto2 = _interopRequireDefault(_crypto);
+
+var _ws = require('ws');
+
+var _ws2 = _interopRequireDefault(_ws);
 
 var _ResponseHandler = require('./handlers/ResponseHandler');
 
@@ -28,29 +32,29 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 var EVENTS = ['auth', 'order', 'ticker', 'balance', 'close', 'other'];
 
-var ArbiterExchangeHitBTC = function () {
-	function ArbiterExchangeHitBTC() {
-		var _this = this;
+var ArbiterExchangeHitBTC = function (_EventEmitter) {
+	_inherits(ArbiterExchangeHitBTC, _EventEmitter);
 
+	function ArbiterExchangeHitBTC() {
 		var baseUrl = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'wss://api.hitbtc.com/api/2/ws';
 
 		_classCallCheck(this, ArbiterExchangeHitBTC);
 
-		this.event = {};
+		var _this = _possibleConstructorReturn(this, (ArbiterExchangeHitBTC.__proto__ || Object.getPrototypeOf(ArbiterExchangeHitBTC)).call(this));
 
-		EVENTS.map(function (name) {
-			return _this.event[name] = function () {};
-		});
-
-		var wsClient = this.wsClient = new _ws2.default(baseUrl, {
+		var wsClient = _this.wsClient = new _ws2.default(baseUrl, {
 			perMessageDeflate: false
 		});
 
-		var responseHandler = new _ResponseHandler2.default(this.event);
+		var responseHandler = new _ResponseHandler2.default(_this);
 
-		var snapshotHandler = new _SnapshotHandler2.default(this.event);
+		var snapshotHandler = new _SnapshotHandler2.default(_this);
 
 		// Handle message and ping the appropriate
 		// litener from the container
@@ -64,16 +68,11 @@ var ArbiterExchangeHitBTC = function () {
 			_this.event['other'](respJSON);
 		});
 
-		wsClient.on('close', this.event['close']);
+		wsClient.on('close', _this.event['close']);
+		return _this;
 	}
 
 	_createClass(ArbiterExchangeHitBTC, [{
-		key: 'on',
-		value: function on(eventName, callback) {
-			this.event[eventName] = callback;
-			return this;
-		}
-	}, {
 		key: 'open',
 		value: function () {
 			var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
@@ -103,6 +102,9 @@ var ArbiterExchangeHitBTC = function () {
 
 			return open;
 		}()
+
+		/* Streaming APIs: */
+
 	}, {
 		key: 'subscribeToReports',
 		value: function subscribeToReports() {
@@ -131,6 +133,64 @@ var ArbiterExchangeHitBTC = function () {
 
 			this.wsClient.send(JSON.stringify(socketMessage));
 		}
+
+		/* REST-like APIs: */
+
+	}, {
+		key: 'sendRequest',
+		value: function sendRequest(socketMessage) {
+			this.wsClient.send(JSON.stringify(socketMessage));
+		}
+	}, {
+		key: 'requestBuyOrder',
+		value: function requestBuyOrder(clientOrderId, symbol, price, quantity) {
+			this.sendRequest({
+				id: _ResponseHandler.EVENT_ID.sell,
+				method: "newOrder",
+				params: {
+					side: "buy",
+					clientOrderId: clientOrderId,
+					symbol: symbol,
+					price: price,
+					quantity: quantity
+				}
+			});
+		}
+	}, {
+		key: 'requestSellOrder',
+		value: function requestSellOrder(clientOrderId, symbol, price, quantity) {
+			this.sendRequest({
+				id: _ResponseHandler.EVENT_ID.sell,
+				method: "newOrder",
+				params: {
+					side: "sell",
+					clientOrderId: clientOrderId,
+					symbol: symbol,
+					price: price,
+					quantity: quantity
+				}
+			});
+		}
+	}, {
+		key: 'requestCancelOrder',
+		value: function requestCancelOrder(clientOrderId) {
+			this.sendRequest({
+				id: _ResponseHandler.EVENT_ID.cancel,
+				method: "cancelOrder",
+				params: {
+					clientOrderId: clientOrderId
+				}
+			});
+		}
+	}, {
+		key: 'requestTradingBalance',
+		value: function requestTradingBalance() {
+			this.sendRequest({
+				id: _ResponseHandler.EVENT_ID.balance,
+				method: "getTradingBalance",
+				params: {}
+			});
+		}
 	}, {
 		key: 'authenticate',
 		value: function authenticate(_ref2) {
@@ -148,22 +208,29 @@ var ArbiterExchangeHitBTC = function () {
 
 			var signature = _crypto2.default.createHmac('sha256', secret).update(nonce).digest('hex');
 
-			var socketMessage = {
+			this.sendRequest({
+				id: id,
 				method: method,
 				params: {
 					algo: algo,
 					pKey: key,
 					nonce: nonce,
 					signature: signature
-				},
-				id: id
-			};
+				}
+			});
 
-			this.wsClient.send(JSON.stringify(socketMessage));
+			var self = this;
+
+			return new Promise(function (resolve, reject) {
+				self.once('auth', function (data) {
+					console.log(data);
+					resolve();
+				});
+			});
 		}
 	}]);
 
 	return ArbiterExchangeHitBTC;
-}();
+}(_events2.default);
 
 exports.default = ArbiterExchangeHitBTC;

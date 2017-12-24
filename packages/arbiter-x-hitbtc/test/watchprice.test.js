@@ -2,7 +2,8 @@ import {
 	authListener,
 	otherListener,
 	tickerListener,
-	orderListener
+	orderListener,
+	balanceListener
 } from 'arbiter-utils';
 
 import ArbiterExchange from '../src';
@@ -17,13 +18,17 @@ async function main(){
 		// .on('other', otherListener)
 		.on('ticker', tickerListener)
 		.on('order', orderListener)
+		.on('balance', balanceListener)
 
 	await exchangeInstance.open();
 
-	exchangeInstance.authenticate(creds);
+	await exchangeInstance.authenticate(creds);
 
 	exchangeInstance.subscribeToReports()
-	exchangeInstance.subscribeToTicker()
+
+	exchangeInstance.requestTradingBalance()
+
+	// exchangeInstance.subscribeToTicker()
 }
 
 main();

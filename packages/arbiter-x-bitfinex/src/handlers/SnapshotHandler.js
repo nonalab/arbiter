@@ -1,9 +1,11 @@
-import {Ticker} from 'arbiter-model';
+import {
+	Ticker
+} from '../models/Ticker';
 
 export default class SnapshotHandler {
 	constructor(event) {
 		this.event = event;
-		
+
 		this.channelMap = {}
 	}
 
@@ -18,16 +20,8 @@ export default class SnapshotHandler {
 		};
 	}
 
-	ticker(pair, [bid, bidSize, ask, askSize, dailyChange, dailyChangePerc, last, volume, high, low]) {
-		this.event['ticker'](new Ticker({
-			symbol: pair,
-			bid,
-			ask,
-			last,
-			low,
-			high,
-			volume
-		}))
+	ticker(pair, data) {
+		this.event['ticker'](new Ticker(pair, data))
 	}
 
 	evaluate([chanId, data]) {

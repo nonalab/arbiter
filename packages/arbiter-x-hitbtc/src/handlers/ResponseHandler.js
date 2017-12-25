@@ -4,22 +4,17 @@ import {
 
 export const EVENT_ID = {
 	// Response events, ID matters
-	auth: 1,
-	balance: 2,
-	buy: 3,
-	sell: 4,
-	cancel: 5,
-	activeOrders: 6
+	auth: 'auth',
+	balance: 'balance',
+	buy: 'buy',
+	sell: 'sell',
+	cancel: 'cancel'
 }
 
 export default class ResponseHandler {
 	constructor(event) {
 		this.event = event;
 		this.eventId = Object.assign({}, EVENT_ID);
-	}
-
-	activeOrders(data) {
-		this.event.emit('order',data)
 	}
 
 	balance(data) {
@@ -30,36 +25,36 @@ export default class ResponseHandler {
 	}
 
 	auth(data) {
-		console.log("AUTHED");
 		this.event.emit('auth', data)
+	}
+
+	buy(data) {
+		this.event.emit('buy', data)
+	}
+
+	sell(data) {
+		this.event.emit('sell', data)
+	}
+
+	cancel(data) {
+		this.event.emit('cancel', data)
 	}
 
 	evaluate({
 		id,
-		result
+		result,
+		error
 	}) {
-		if(!id) {
+		if(!id || !this.eventId[id]) {
 			return false
 		}
 
-		switch(id) {
-		case this.eventId.balance:
-			{
-				this.balance(result)
-				return true;
-			}
-		case this.eventId.auth:
-			{
-				this.auth(result)
-				return true;
-			}
-		case this.eventId.activeOrders:
-			{
-				this.activeOrders(result)
-				return true;
-			}
-		default:
-			return false
+		if(error) {
+			this.event.emit('error', error)
+		} else {
+			this[this.eventId[id]](result)
 		}
+
+		return true
 	}
 }

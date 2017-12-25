@@ -1,3 +1,5 @@
+import crypto from 'crypto'
+
 export async function wait(duration) {
 	return new Promise(function (resolve, reject) {
 		setTimeout(() => {
@@ -11,17 +13,21 @@ export function taggedLog(tag, info) {
 	console.log(info);
 }
 
-export function tickerListener({
-	ask,
-	bid,
-	symbol,
-	timestamp
-}) {
-	taggedLog(`TICKER - ${symbol}`, `ASK: ${ask} - BID: ${bid} - TIME: ${timestamp}`)
+export async function generateOrderId(size = 16) {
+	return new Promise(function (resolve, reject) {
+		crypto.randomBytes(size, (err, buf) => {
+			if(err) reject(err);
+			resolve(buf.toString('hex'));
+		});
+	});
 }
 
-export function orderListener(data) {
-	taggedLog(`ORDER - `, data)
+export function tickerListener(ticker) {
+	taggedLog(`TICKER - ${ticker.symbol}`, ticker.toString())
+}
+
+export function orderListener(order) {
+	taggedLog(`ORDER - ${order.side} - ${order.symbol}`, order.toString())
 }
 
 export function authListener(respJSON) {
@@ -34,4 +40,8 @@ export function otherListener(respJSON) {
 
 export function balanceListener(data) {
 	taggedLog(`BALANCE`, data)
+}
+
+export function errorListener(data) {
+	taggedLog(`ERROR`, data)
 }

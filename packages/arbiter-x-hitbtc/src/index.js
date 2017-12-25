@@ -2,6 +2,10 @@ import EventEmitter from 'events';
 import crypto from 'crypto';
 import WebSocket from 'ws';
 
+import {
+	generateOrderId
+} from 'arbiter-utils';
+
 import ResponseHandler, {
 	EVENT_ID
 } from './handlers/ResponseHandler';
@@ -46,71 +50,98 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		} = this;
 		return new Promise(function (resolve, reject) {
 			wsClient.on('open', () => resolve())
-		});
+		})
+	}
+
+	send(socketMessage) {
+		if(!socketMessage) return;
+		this.wsClient.send(JSON.stringify(socketMessage))
 	}
 
 	/* Streaming APIs: */
 	subscribeToReports() {
-		const method = "subscribeReports";
-
-		const socketMessage = {
-			method,
+		this.send({
+			method: 'subscribeReports',
 			params: {}
-		}
-
-		this.wsClient.send(JSON.stringify(socketMessage))
+		})
 	}
 
-	subscribeToTicker(symbol = "ETHUSD") {
-		const method = "subscribeTicker";
-
-		const socketMessage = {
-			method,
+	subscribeToTicker(symbol = 'ETHUSD') {
+		this.send({
+			method: 'subscribeTicker',
 			params: {
 				symbol
-			}
-		}
-
-		this.wsClient.send(JSON.stringify(socketMessage))
-	}
-
-	/* REST-like APIs: */
-	sendRequest(socketMessage) {
-		this.wsClient.send(JSON.stringify(socketMessage))
-	}
-
-	requestBuyOrder(clientOrderId, symbol, price, quantity) {
-		this.sendRequest({
-			id: EVENT_ID.sell,
-			method: "newOrder",
-			params: {
-				side: "buy",
-				clientOrderId,
-				symbol,
-				price,
-				quantity,
 			}
 		})
 	}
 
-	requestSellOrder(clientOrderId, symbol, price, quantity) {
-		this.sendRequest({
+	/* REST-like APIs: */
+
+	async makeOrderParams(side, symbol, quantity, price) {
+		const clientOrderId = await generateOrderId()
+
+		const params = {
+			side,
+			symbol,
+			quantity,
+			clientOrderId,
+		}
+
+		if(!price) {
+			params.type = 'market'
+			params.timeInForce = 'IOC'
+		} else {
+			params.price = price
+		}
+
+		return params;
+	}
+
+	async requestBuyOrder(symbol = 'ETHUSD', quantity = 0.01, price = 0) {
+
+		const params = await this.makeOrderParams('buy', symbol, quantity, price, )
+
+		this.send({
+			id: EVENT_ID.buy,
+			method: 'newOrder',
+			params
+		})
+
+		const self = this;
+
+		return new Promise(function (resolve, reject) {
+			self.on('buy', (data) => {
+				if(data.clientOrderId === params.clientOrderId) {
+					resolve(data)
+				}
+			})
+		})
+	}
+
+	async requestSellOrder(symbol = 'ETHUSD', quantity = 0.01, price = 0) {
+		const params = await this.makeOrderParams('sell', symbol, quantity, price, )
+
+		this.send({
 			id: EVENT_ID.sell,
-			method: "newOrder",
-			params: {
-				side: "sell",
-				clientOrderId,
-				symbol,
-				price,
-				quantity,
-			}
+			method: 'newOrder',
+			params
+		})
+
+		const self = this;
+
+		return new Promise(function (resolve, reject) {
+			self.on('sell', (data) => {
+				if(data.clientOrderId === params.clientOrderId) {
+					resolve(data)
+				}
+			})
 		})
 	}
 
 	requestCancelOrder(clientOrderId) {
-		this.sendRequest({
+		this.send({
 			id: EVENT_ID.cancel,
-			method: "cancelOrder",
+			method: 'cancelOrder',
 			params: {
 				clientOrderId
 			}
@@ -118,9 +149,9 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 	}
 
 	requestTradingBalance() {
-		this.sendRequest({
+		this.send({
 			id: EVENT_ID.balance,
-			method: "getTradingBalance",
+			method: 'getTradingBalance',
 			params: {}
 		})
 	}
@@ -129,11 +160,11 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		key,
 		secret
 	}) {
+		const self = this;
+
 		const id = EVENT_ID.auth;
-
-		const method = "login";
-
-		const algo = "HS256";
+		const method = 'login';
+		const algo = 'HS256';
 
 		// Authentication using sha256 is something boggling :O
 		const nonce = Date.now() + Math.random()
@@ -143,7 +174,7 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 			.update(nonce)
 			.digest('hex');
 
-		this.sendRequest({
+		this.send({
 			id,
 			method,
 			params: {
@@ -154,11 +185,8 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 			},
 		})
 
-		const self = this;
-
 		return new Promise(function (resolve, reject) {
 			self.on('auth', data => data ? resolve() : reject())
-		});
+		})
 	}
-
 }

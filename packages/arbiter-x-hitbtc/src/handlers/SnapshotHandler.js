@@ -1,5 +1,7 @@
 import {Ticker} from 'arbiter-model';
 
+import {Order} from '../models/Order';
+
 export default class SnapshotHandler {
 	constructor(event) {
 		this.event = event;
@@ -12,8 +14,14 @@ export default class SnapshotHandler {
 		this.event.emit('ticker', new Ticker(data))
 	}
 
-	activeOrders(data){
-		this.event.emit('order', (data))
+	activeOrders(data) {
+		const orders = data.map((order) => new Order(order))
+
+		this.event.emit('orders', orders)
+	}
+
+	report(data) {
+		this.event.emit('order', new Order(data))
 	}
 
 	evaluate({

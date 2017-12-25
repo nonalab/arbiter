@@ -8,7 +8,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _arbiterModel = require('arbiter-model');
+var _Ticker = require('../models/Ticker');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -35,35 +35,15 @@ var SnapshotHandler = function () {
 		}
 	}, {
 		key: 'ticker',
-		value: function ticker(pair, _ref2) {
-			var _ref3 = _slicedToArray(_ref2, 10),
-			    bid = _ref3[0],
-			    bidSize = _ref3[1],
-			    ask = _ref3[2],
-			    askSize = _ref3[3],
-			    dailyChange = _ref3[4],
-			    dailyChangePerc = _ref3[5],
-			    last = _ref3[6],
-			    volume = _ref3[7],
-			    high = _ref3[8],
-			    low = _ref3[9];
-
-			this.event['ticker'](new _arbiterModel.Ticker({
-				symbol: pair,
-				bid: bid,
-				ask: ask,
-				last: last,
-				low: low,
-				high: high,
-				volume: volume
-			}));
+		value: function ticker(pair, data) {
+			this.event['ticker'](new _Ticker.Ticker(pair, data));
 		}
 	}, {
 		key: 'evaluate',
-		value: function evaluate(_ref4) {
-			var _ref5 = _slicedToArray(_ref4, 2),
-			    chanId = _ref5[0],
-			    data = _ref5[1];
+		value: function evaluate(_ref2) {
+			var _ref3 = _slicedToArray(_ref2, 2),
+			    chanId = _ref3[0],
+			    data = _ref3[1];
 
 			if (typeof data === 'string' || data.length < 2) {
 				return false;

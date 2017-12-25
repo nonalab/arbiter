@@ -8,6 +8,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _arbiterModel = require('arbiter-model');
 
+var _Order = require('../models/Order');
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var SnapshotHandler = function () {
@@ -25,12 +27,21 @@ var SnapshotHandler = function () {
 	_createClass(SnapshotHandler, [{
 		key: 'ticker',
 		value: function ticker(data) {
-			this.event['ticker'](new _arbiterModel.Ticker(data));
+			this.event.emit('ticker', new _arbiterModel.Ticker(data));
 		}
 	}, {
 		key: 'activeOrders',
 		value: function activeOrders(data) {
-			this.event['order'](data);
+			var orders = data.map(function (order) {
+				return new _Order.Order(order);
+			});
+
+			this.event.emit('orders', orders);
+		}
+	}, {
+		key: 'report',
+		value: function report(data) {
+			this.event.emit('order', new _Order.Order(data));
 		}
 	}, {
 		key: 'evaluate',

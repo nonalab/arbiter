@@ -13,12 +13,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var EVENT_ID = exports.EVENT_ID = {
 	// Response events, ID matters
-	auth: 0,
-	balance: 1,
-	buy: 2,
-	sell: 3,
-	cancel: 4,
-	activeOrders: 5
+	auth: 'auth',
+	balance: 'balance',
+	buy: 'buy',
+	sell: 'sell',
+	cancel: 'cancel'
 };
 
 var ResponseHandler = function () {
@@ -30,11 +29,6 @@ var ResponseHandler = function () {
 	}
 
 	_createClass(ResponseHandler, [{
-		key: 'activeOrders',
-		value: function activeOrders(data) {
-			this.event.emit('order', data);
-		}
-	}, {
 		key: 'balance',
 		value: function balance(data) {
 			var validBalances = data.map(function (item) {
@@ -51,34 +45,38 @@ var ResponseHandler = function () {
 			this.event.emit('auth', data);
 		}
 	}, {
+		key: 'buy',
+		value: function buy(data) {
+			this.event.emit('buy', data);
+		}
+	}, {
+		key: 'sell',
+		value: function sell(data) {
+			this.event.emit('sell', data);
+		}
+	}, {
+		key: 'cancel',
+		value: function cancel(data) {
+			this.event.emit('cancel', data);
+		}
+	}, {
 		key: 'evaluate',
 		value: function evaluate(_ref) {
 			var id = _ref.id,
-			    result = _ref.result;
+			    result = _ref.result,
+			    error = _ref.error;
 
-			if (!id) {
+			if (!id || !this.eventId[id]) {
 				return false;
 			}
 
-			switch (id) {
-				case this.eventId.balance:
-					{
-						this.balance(result);
-						return true;
-					}
-				case this.eventId.auth:
-					{
-						this.auth(result);
-						return true;
-					}
-				case this.eventId.activeOrders:
-					{
-						this.activeOrders(result);
-						return true;
-					}
-				default:
-					return false;
+			if (error) {
+				this.event.emit('error', error);
+			} else {
+				this[this.eventId[id]](result);
 			}
+
+			return true;
 		}
 	}]);
 

@@ -3,32 +3,49 @@ import {
 	otherListener,
 	tickerListener,
 	orderListener,
-	balanceListener
+	balanceListener,
+	errorListener,
+	wait,
+	taggedLog
 } from 'arbiter-utils';
 
 import ArbiterExchange from '../src';
 
 import creds from '../credentials.json';
 
-async function main(){
+async function main() {
 	const exchangeInstance = new ArbiterExchange();
 
 	exchangeInstance
 		// .on('auth', authListener)
 		// .on('other', otherListener)
-		.on('ticker', tickerListener)
+		// .on('ticker', tickerListener)
 		.on('order', orderListener)
 		.on('balance', balanceListener)
+		.on('error', errorListener)
 
-	await exchangeInstance.open();
+	try {
+		await exchangeInstance.open();
 
-	await exchangeInstance.authenticate(creds);
+		await exchangeInstance.authenticate(creds);
 
-	exchangeInstance.subscribeToReports()
+		exchangeInstance.subscribeToReports()
 
-	exchangeInstance.requestTradingBalance()
+		exchangeInstance.requestTradingBalance()
 
-	// exchangeInstance.subscribeToTicker()
+		exchangeInstance.subscribeToTicker()
+
+		await exchangeInstance.requestBuyOrder()
+
+		await wait(2000);
+
+		// exchangeInstance.requestCancelOrder(clientOrderId)
+
+		await exchangeInstance.requestSellOrder()
+
+	} catch(e) {
+		taggedLog('ERROR', e);
+	}
 }
 
 main();

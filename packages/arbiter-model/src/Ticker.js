@@ -20,5 +20,7 @@ export class Ticker {
 		this.timestamp = new Date(timestamp);
 	}
 
-
+	toString(){
+		return `ASK: ${this.ask} - BID: ${this.bid} - TIME: ${this.timestamp}`
+	}
 }

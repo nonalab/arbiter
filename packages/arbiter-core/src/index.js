@@ -60,13 +60,12 @@ function tickerListener(exchange, {
 	symbol
 }) {
 	// taggedLog(`TICKER - ${exchange} - ${symbol}`, `ASK: ${ask} - BID: ${bid} - TIME: ${timestamp}`)
-	const currency = symbol.slice(0, -3);
-	updatePrice(currency, exchange, ask, bid);
+	updatePrice(symbol, exchange, ask, bid);
 }
 
-function updatePrice(currency, exchange, ask, bid) {
-	if(!store.price[currency]) {
-		store.price[currency] = {}
+function updatePrice(symbol, exchange, ask, bid) {
+	if(!store.price[symbol]) {
+		store.price[symbol] = {}
 	}
-	store.price[currency][exchange] = { ask, bid }
+	store.price[symbol][exchange] = { ask, bid }
 }

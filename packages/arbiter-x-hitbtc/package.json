@@ -12,13 +12,14 @@
   "license": "LAB",
   "devDependencies": {
     "babel-cli": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.6.1"
   },
   "dependencies": {
     "arbiter-model": "^1.0.0",
     "arbiter-utils": "^1.0.0",
     "bufferutil": "^3.0.3",
-    "utf-8-validate": "^3.0.4",
+    "utf-8-validate": "^4.0.0",
     "ws": "^3.3.1"
   }
 }

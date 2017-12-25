@@ -18,6 +18,8 @@ var _ws = require('ws');
 
 var _ws2 = _interopRequireDefault(_ws);
 
+var _arbiterUtils = require('arbiter-utils');
+
 var _ResponseHandler = require('./handlers/ResponseHandler');
 
 var _ResponseHandler2 = _interopRequireDefault(_ResponseHandler);
@@ -65,10 +67,12 @@ var ArbiterExchangeHitBTC = function (_EventEmitter) {
 
 			if (snapshotHandler.evaluate(respJSON)) return;
 
-			_this.event['other'](respJSON);
+			_this.emit('other', respJSON);
 		});
 
-		wsClient.on('close', _this.event['close']);
+		wsClient.on('close', function () {
+			return _this.emit('close');
+		});
 		return _this;
 	}
 
@@ -84,7 +88,7 @@ var ArbiterExchangeHitBTC = function (_EventEmitter) {
 								wsClient = this.wsClient;
 								return _context.abrupt('return', new Promise(function (resolve, reject) {
 									wsClient.on('open', function () {
-										resolve();
+										return resolve();
 									});
 								}));
 
@@ -102,81 +106,185 @@ var ArbiterExchangeHitBTC = function (_EventEmitter) {
 
 			return open;
 		}()
+	}, {
+		key: 'send',
+		value: function send(socketMessage) {
+			if (!socketMessage) return;
+			this.wsClient.send(JSON.stringify(socketMessage));
+		}
 
 		/* Streaming APIs: */
 
 	}, {
 		key: 'subscribeToReports',
 		value: function subscribeToReports() {
-			var method = "subscribeReports";
-
-			var socketMessage = {
-				method: method,
+			this.send({
+				method: 'subscribeReports',
 				params: {}
-			};
-
-			this.wsClient.send(JSON.stringify(socketMessage));
+			});
 		}
 	}, {
 		key: 'subscribeToTicker',
 		value: function subscribeToTicker() {
-			var symbol = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "ETHUSD";
+			var symbol = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'ETHUSD';
 
-			var method = "subscribeTicker";
-
-			var socketMessage = {
-				method: method,
+			this.send({
+				method: 'subscribeTicker',
 				params: {
 					symbol: symbol
 				}
-			};
-
-			this.wsClient.send(JSON.stringify(socketMessage));
+			});
 		}
 
 		/* REST-like APIs: */
 
 	}, {
-		key: 'sendRequest',
-		value: function sendRequest(socketMessage) {
-			this.wsClient.send(JSON.stringify(socketMessage));
-		}
+		key: 'makeOrderParams',
+		value: function () {
+			var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(side, symbol, quantity, price) {
+				var clientOrderId, params;
+				return regeneratorRuntime.wrap(function _callee2$(_context2) {
+					while (1) {
+						switch (_context2.prev = _context2.next) {
+							case 0:
+								_context2.next = 2;
+								return (0, _arbiterUtils.generateOrderId)();
+
+							case 2:
+								clientOrderId = _context2.sent;
+								params = {
+									side: side,
+									symbol: symbol,
+									quantity: quantity,
+									clientOrderId: clientOrderId
+								};
+
+
+								if (!price) {
+									params.type = 'market';
+									params.timeInForce = 'IOC';
+								} else {
+									params.price = price;
+								}
+
+								return _context2.abrupt('return', params);
+
+							case 6:
+							case 'end':
+								return _context2.stop();
+						}
+					}
+				}, _callee2, this);
+			}));
+
+			function makeOrderParams(_x3, _x4, _x5, _x6) {
+				return _ref2.apply(this, arguments);
+			}
+
+			return makeOrderParams;
+		}()
 	}, {
 		key: 'requestBuyOrder',
-		value: function requestBuyOrder(clientOrderId, symbol, price, quantity) {
-			this.sendRequest({
-				id: _ResponseHandler.EVENT_ID.sell,
-				method: "newOrder",
-				params: {
-					side: "buy",
-					clientOrderId: clientOrderId,
-					symbol: symbol,
-					price: price,
-					quantity: quantity
-				}
-			});
-		}
+		value: function () {
+			var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+				var symbol = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'ETHUSD';
+				var quantity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0.01;
+				var price = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+				var params, self;
+				return regeneratorRuntime.wrap(function _callee3$(_context3) {
+					while (1) {
+						switch (_context3.prev = _context3.next) {
+							case 0:
+								_context3.next = 2;
+								return this.makeOrderParams('buy', symbol, quantity, price);
+
+							case 2:
+								params = _context3.sent;
+
+
+								this.send({
+									id: _ResponseHandler.EVENT_ID.buy,
+									method: 'newOrder',
+									params: params
+								});
+
+								self = this;
+								return _context3.abrupt('return', new Promise(function (resolve, reject) {
+									self.on('buy', function (data) {
+										if (data.clientOrderId === params.clientOrderId) {
+											resolve(data);
+										}
+									});
+								}));
+
+							case 6:
+							case 'end':
+								return _context3.stop();
+						}
+					}
+				}, _callee3, this);
+			}));
+
+			function requestBuyOrder() {
+				return _ref3.apply(this, arguments);
+			}
+
+			return requestBuyOrder;
+		}()
 	}, {
 		key: 'requestSellOrder',
-		value: function requestSellOrder(clientOrderId, symbol, price, quantity) {
-			this.sendRequest({
-				id: _ResponseHandler.EVENT_ID.sell,
-				method: "newOrder",
-				params: {
-					side: "sell",
-					clientOrderId: clientOrderId,
-					symbol: symbol,
-					price: price,
-					quantity: quantity
-				}
-			});
-		}
+		value: function () {
+			var _ref4 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
+				var symbol = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'ETHUSD';
+				var quantity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0.01;
+				var price = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+				var params, self;
+				return regeneratorRuntime.wrap(function _callee4$(_context4) {
+					while (1) {
+						switch (_context4.prev = _context4.next) {
+							case 0:
+								_context4.next = 2;
+								return this.makeOrderParams('sell', symbol, quantity, price);
+
+							case 2:
+								params = _context4.sent;
+
+
+								this.send({
+									id: _ResponseHandler.EVENT_ID.sell,
+									method: 'newOrder',
+									params: params
+								});
+
+								self = this;
+								return _context4.abrupt('return', new Promise(function (resolve, reject) {
+									self.on('sell', function (data) {
+										if (data.clientOrderId === params.clientOrderId) {
+											resolve(data);
+										}
+									});
+								}));
+
+							case 6:
+							case 'end':
+								return _context4.stop();
+						}
+					}
+				}, _callee4, this);
+			}));
+
+			function requestSellOrder() {
+				return _ref4.apply(this, arguments);
+			}
+
+			return requestSellOrder;
+		}()
 	}, {
 		key: 'requestCancelOrder',
 		value: function requestCancelOrder(clientOrderId) {
-			this.sendRequest({
+			this.send({
 				id: _ResponseHandler.EVENT_ID.cancel,
-				method: "cancelOrder",
+				method: 'cancelOrder',
 				params: {
 					clientOrderId: clientOrderId
 				}
@@ -185,49 +293,65 @@ var ArbiterExchangeHitBTC = function (_EventEmitter) {
 	}, {
 		key: 'requestTradingBalance',
 		value: function requestTradingBalance() {
-			this.sendRequest({
+			this.send({
 				id: _ResponseHandler.EVENT_ID.balance,
-				method: "getTradingBalance",
+				method: 'getTradingBalance',
 				params: {}
 			});
 		}
 	}, {
 		key: 'authenticate',
-		value: function authenticate(_ref2) {
-			var key = _ref2.key,
-			    secret = _ref2.secret;
+		value: function () {
+			var _ref6 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5(_ref5) {
+				var key = _ref5.key,
+				    secret = _ref5.secret;
+				var self, id, method, algo, nonce, signature;
+				return regeneratorRuntime.wrap(function _callee5$(_context5) {
+					while (1) {
+						switch (_context5.prev = _context5.next) {
+							case 0:
+								self = this;
+								id = _ResponseHandler.EVENT_ID.auth;
+								method = 'login';
+								algo = 'HS256';
 
-			var id = _ResponseHandler.EVENT_ID.auth;
+								// Authentication using sha256 is something boggling :O
 
-			var method = "login";
+								nonce = Date.now() + Math.random().toString();
+								signature = _crypto2.default.createHmac('sha256', secret).update(nonce).digest('hex');
 
-			var algo = "HS256";
 
-			// Authentication using sha256 is something boggling :O
-			var nonce = Date.now() + Math.random().toString();
+								this.send({
+									id: id,
+									method: method,
+									params: {
+										algo: algo,
+										pKey: key,
+										nonce: nonce,
+										signature: signature
+									}
+								});
 
-			var signature = _crypto2.default.createHmac('sha256', secret).update(nonce).digest('hex');
+								return _context5.abrupt('return', new Promise(function (resolve, reject) {
+									self.on('auth', function (data) {
+										return data ? resolve() : reject();
+									});
+								}));
 
-			this.sendRequest({
-				id: id,
-				method: method,
-				params: {
-					algo: algo,
-					pKey: key,
-					nonce: nonce,
-					signature: signature
-				}
-			});
+							case 8:
+							case 'end':
+								return _context5.stop();
+						}
+					}
+				}, _callee5, this);
+			}));
 
-			var self = this;
+			function authenticate(_x13) {
+				return _ref6.apply(this, arguments);
+			}
 
-			return new Promise(function (resolve, reject) {
-				self.once('auth', function (data) {
-					console.log(data);
-					resolve();
-				});
-			});
-		}
+			return authenticate;
+		}()
 	}]);
 
 	return ArbiterExchangeHitBTC;

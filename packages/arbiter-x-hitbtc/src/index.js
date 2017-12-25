@@ -6,13 +6,9 @@ import {
 	generateOrderId
 } from 'arbiter-utils';
 
-import ResponseHandler, {
-	EVENT_ID
-} from './handlers/ResponseHandler';
+import ResponseHandler from './handlers/ResponseHandler';
 
 import SnapshotHandler from './handlers/SnapshotHandler';
-
-const EVENTS = ['auth', 'order', 'ticker', 'balance', 'close', 'other']
 
 export default class ArbiterExchangeHitBTC extends EventEmitter {
 
@@ -102,7 +98,7 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		const params = await this.makeOrderParams('buy', symbol, quantity, price, )
 
 		this.send({
-			id: EVENT_ID.buy,
+			id: 'buy',
 			method: 'newOrder',
 			params
 		})
@@ -122,7 +118,7 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		const params = await this.makeOrderParams('sell', symbol, quantity, price, )
 
 		this.send({
-			id: EVENT_ID.sell,
+			id: 'sell',
 			method: 'newOrder',
 			params
 		})
@@ -140,7 +136,7 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 
 	requestCancelOrder(clientOrderId) {
 		this.send({
-			id: EVENT_ID.cancel,
+			id: 'cancel',
 			method: 'cancelOrder',
 			params: {
 				clientOrderId
@@ -150,7 +146,7 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 
 	requestTradingBalance() {
 		this.send({
-			id: EVENT_ID.balance,
+			id: 'balance',
 			method: 'getTradingBalance',
 			params: {}
 		})
@@ -162,7 +158,7 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 	}) {
 		const self = this;
 
-		const id = EVENT_ID.auth;
+		const id = 'auth';
 		const method = 'login';
 		const algo = 'HS256';
 

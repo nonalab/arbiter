@@ -106,7 +106,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
-var UPDATE_INTERVAL = 500;
+var UPDATE_INTERVAL = 900;
 
 var bitFinexInstance = new _arbiterXBitfinex2.default();
 var hitBTCInstance = new _arbiterXHitbtc2.default();
@@ -129,7 +129,12 @@ function tickerListener(exchange, _ref4) {
 
 function updatePrice(symbol, exchange, ask, bid) {
 	if (!store.price[symbol]) {
-		store.price[symbol] = {};
+		store.price[symbol] = {
+			ask: {},
+			bid: {}
+		};
 	}
-	store.price[symbol][exchange] = { ask: ask, bid: bid };
+	store.price[symbol].ask[exchange] = ask;
+
+	store.price[symbol].bid[exchange] = bid;
 }

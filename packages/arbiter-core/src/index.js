@@ -10,7 +10,7 @@ import {
 	foreverProcess
 } from './main';
 
-const UPDATE_INTERVAL = 500;
+const UPDATE_INTERVAL = 900;
 
 const bitFinexInstance = new ArbiterExchangeBitFinex();
 const hitBTCInstance = new ArbiterExchangeHitBTC();
@@ -65,7 +65,12 @@ function tickerListener(exchange, {
 
 function updatePrice(symbol, exchange, ask, bid) {
 	if(!store.price[symbol]) {
-		store.price[symbol] = {}
+		store.price[symbol] = {
+			ask: {},
+			bid: {}
+		}
 	}
-	store.price[symbol][exchange] = { ask, bid }
+	store.price[symbol].ask[exchange] = ask;
+
+	store.price[symbol].bid[exchange] = bid;
 }

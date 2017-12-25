@@ -38,8 +38,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var EVENTS = ['auth', 'order', 'ticker', 'balance', 'close', 'other'];
-
 var ArbiterExchangeHitBTC = function (_EventEmitter) {
 	_inherits(ArbiterExchangeHitBTC, _EventEmitter);
 
@@ -203,7 +201,7 @@ var ArbiterExchangeHitBTC = function (_EventEmitter) {
 
 
 								this.send({
-									id: _ResponseHandler.EVENT_ID.buy,
+									id: 'buy',
 									method: 'newOrder',
 									params: params
 								});
@@ -251,7 +249,7 @@ var ArbiterExchangeHitBTC = function (_EventEmitter) {
 
 
 								this.send({
-									id: _ResponseHandler.EVENT_ID.sell,
+									id: 'sell',
 									method: 'newOrder',
 									params: params
 								});
@@ -283,7 +281,7 @@ var ArbiterExchangeHitBTC = function (_EventEmitter) {
 		key: 'requestCancelOrder',
 		value: function requestCancelOrder(clientOrderId) {
 			this.send({
-				id: _ResponseHandler.EVENT_ID.cancel,
+				id: 'cancel',
 				method: 'cancelOrder',
 				params: {
 					clientOrderId: clientOrderId
@@ -294,7 +292,7 @@ var ArbiterExchangeHitBTC = function (_EventEmitter) {
 		key: 'requestTradingBalance',
 		value: function requestTradingBalance() {
 			this.send({
-				id: _ResponseHandler.EVENT_ID.balance,
+				id: 'balance',
 				method: 'getTradingBalance',
 				params: {}
 			});
@@ -311,7 +309,7 @@ var ArbiterExchangeHitBTC = function (_EventEmitter) {
 						switch (_context5.prev = _context5.next) {
 							case 0:
 								self = this;
-								id = _ResponseHandler.EVENT_ID.auth;
+								id = 'auth';
 								method = 'login';
 								algo = 'HS256';
 

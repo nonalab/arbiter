@@ -2,19 +2,9 @@ import {
 	Balance
 } from 'arbiter-model';
 
-export const EVENT_ID = {
-	// Response events, ID matters
-	auth: 'auth',
-	balance: 'balance',
-	buy: 'buy',
-	sell: 'sell',
-	cancel: 'cancel'
-}
-
 export default class ResponseHandler {
 	constructor(event) {
 		this.event = event;
-		this.eventId = Object.assign({}, EVENT_ID);
 	}
 
 	balance(data) {
@@ -45,14 +35,14 @@ export default class ResponseHandler {
 		result,
 		error
 	}) {
-		if(!id || !this.eventId[id]) {
+		if(!id || !this[id]) {
 			return false
 		}
 
 		if(error) {
 			this.event.emit('error', error)
 		} else {
-			this[this.eventId[id]](result)
+			this[id](result)
 		}
 
 		return true

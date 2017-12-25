@@ -2,27 +2,34 @@ import {
 	authListener,
 	otherListener,
 	tickerListener,
-	orderListener
-} from 'arbiter-utils';
+	orderListener,
+	taggedLog
+} from 'arbiter-util';
 
 import ArbiterExchange from '../src';
 
 import creds from '../credentials.json';
 
-async function main(){
+async function main() {
 	const exchangeInstance = new ArbiterExchange();
 
 	exchangeInstance
 		// .on('auth', authListener)
-		// .on('other', otherListener)
+		// .on('order', orderListener)
+		.on('other', otherListener)
 		.on('ticker', tickerListener)
-		.on('order', orderListener)
 
-	await exchangeInstance.open();
+	try {
 
-	exchangeInstance.authenticate(creds);
+		await exchangeInstance.open();
 
-	exchangeInstance.subscribeToTicker()
+		// exchangeInstance.authenticate(creds);
+
+		exchangeInstance.subscribeToTicker()
+
+	} catch(e) {
+		taggedLog('ERROR', e)
+	}
 }
 
 main();

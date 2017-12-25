@@ -98,7 +98,7 @@ var _arbiterStore = require('arbiter-store');
 
 var _arbiterStore2 = _interopRequireDefault(_arbiterStore);
 
-var _arbiterUtils = require('arbiter-utils');
+var _arbiterUtil = require('arbiter-util');
 
 var _main = require('./main');
 

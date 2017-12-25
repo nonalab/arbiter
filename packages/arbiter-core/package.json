@@ -18,7 +18,7 @@
   "dependencies": {
     "arbiter-model": "^1.0.0",
     "arbiter-store": "^1.0.0",
-    "arbiter-utils": "^1.0.0",
+    "arbiter-util": "^1.0.0",
     "arbiter-x-bitfinex": "^1.0.0",
     "arbiter-x-hitbtc": "^1.0.0",
     "bufferutil": "^3.0.3",

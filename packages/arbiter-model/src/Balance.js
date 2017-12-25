@@ -2,15 +2,13 @@
 export class Balance {
 	constructor({
 		currency,
-		available,
-		reserved
+		available
 	}) {
 		this.currency = currency;
 		this.available = Number(available);
-		this.reserved = Number(reserved);
 	}
 
     isFunded() {
-        return this.available > 0 || this.reserved > 0
+        return this.available > 0
     }
 }

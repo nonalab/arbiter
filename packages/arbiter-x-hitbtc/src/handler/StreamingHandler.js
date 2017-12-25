@@ -1,8 +1,12 @@
-import {Ticker} from 'arbiter-model';
+import {
+	Ticker
+} from 'arbiter-model';
 
-import {Order} from '../models/Order';
+import {
+	Order
+} from '../model';
 
-export default class SnapshotHandler {
+export default class StreamingHandler {
 	constructor(event) {
 		this.event = event;
 	}

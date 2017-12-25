@@ -1,74 +1,80 @@
+import EventEmitter from 'events';
 import WebSocket from 'ws';
+
 import crypto from 'crypto-js';
 
-import SnapshotHandler from './handlers/SnapshotHandler';
+import PublicChannelHandler from './handler/PublicChannelHandler';
 
-const EVENTS = ['auth', 'ticker', 'balance', 'close', 'other']
+import AuthenticatedChannelHandler from './handler/AuthenticatedChannelHandler';
 
-export default class ArbiterExchangeBitFinex {
+export default class ArbiterExchangeBitFinex extends EventEmitter {
 
 	constructor(baseUrl = 'wss://api.bitfinex.com/ws/2') {
-		this.event = {}
-
-		EVENTS.map(name => this.event[name] = () => {})
+		super()
 
 		const wsClient = this.wsClient = new WebSocket(baseUrl, {
 			perMessageDeflate: false
 		});
 
-		const snapshotHandler = new SnapshotHandler(this.event);
+		const publicChannelHandler = new PublicChannelHandler(this);
+
+		const authenticatedChannelHandler = new AuthenticatedChannelHandler(this);
+
 
 		// Handle message and ping the appropriate
 		// litener from the container
 		wsClient.on('message', (resp) => {
 			const respJSON = JSON.parse(resp);
 
-			if (respJSON.event) {
-				snapshotHandler.register(respJSON);
-				return;
+			if(respJSON.event) {
+				return publicChannelHandler.register(respJSON);
 			}
 
-			if(snapshotHandler.evaluate(respJSON))
+			if(publicChannelHandler.evaluate(respJSON))
 				return;
 
-			this.event['other'](respJSON)
+			if(authenticatedChannelHandler.evaluate(respJSON))
+				return;
+
+			this.emit('other', respJSON)
 		})
 
-		wsClient.on('close', this.event['close'])
+		wsClient.on('close', () => this.emit('close'))
 	}
 
-	on(eventName, callback) {
-		this.event[eventName] = callback;
-		return this;
-	}
-
-	async open(){
-		const {wsClient} = this;
-		return new Promise(function(resolve, reject) {
-			wsClient.on('open', () => {
-				resolve()
-			})
+	async open() {
+		const {
+			wsClient
+		} = this;
+		return new Promise(function (resolve, reject) {
+			wsClient.on('open', () => resolve())
 		});
 	}
 
-	subscribeToTicker(rawSymbol="ETHUSD") {
-		const event = "subscribe";
-
-		const channel = "ticker";
-
-		const symbol = `t${rawSymbol}`;
-
-		const socketMessage = {event, channel, symbol}
-
+	send(socketMessage) {
+		if(!socketMessage) return;
 		this.wsClient.send(JSON.stringify(socketMessage))
 	}
 
-	authenticate({key, secret}) {
-		const event = "auth";
+	/* Streaming APIs: */
+	subscribeToTicker(rawSymbol = 'ETHUSD') {
+		this.send({
+			event: 'subscribe',
+			channel: 'ticker',
+			symbol: `t${rawSymbol}`,
+		})
+	}
 
-		const method = "login";
+	async authenticate({
+		key,
+		secret
+	}) {
+		const self = this;
 
-		const nonce = Date.now() + Math.random().toString()
+		const event = 'auth';
+
+		const nonce = Date.now() + Math.random()
+			.toString()
 
 		const payload = 'AUTH' + nonce;
 
@@ -82,16 +88,18 @@ export default class ArbiterExchangeBitFinex {
 			.HmacSHA384(payload, secret)
 			.toString(crypto.enc.Hex)
 
-		const socketMessage = {
+		this.send({
 			event,
 			filter,
 			apiKey: key,
 			authSig: signature,
 			authNonce: nonce,
 			authPayload: payload,
-		}
+		})
 
-		this.wsClient.send(JSON.stringify(socketMessage))
+		return new Promise(function (resolve, reject) {
+			self.on('auth', data => data ? resolve() : reject())
+		})
 	}
 
 }

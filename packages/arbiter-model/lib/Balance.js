@@ -17,6 +17,7 @@ var Balance = exports.Balance = function () {
 
 		_classCallCheck(this, Balance);
 
+		console.log("RESERVED: ", reserved);
 		this.currency = currency;
 		this.available = Number(available);
 		this.reserved = Number(reserved);

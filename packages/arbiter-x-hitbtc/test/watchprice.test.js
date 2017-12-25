@@ -7,7 +7,7 @@ import {
 	errorListener,
 	wait,
 	taggedLog
-} from 'arbiter-utils';
+} from 'arbiter-util';
 
 import ArbiterExchange from '../src';
 
@@ -39,7 +39,7 @@ async function main() {
 
 		await wait(2000);
 
-		// exchangeInstance.requestCancelOrder(clientOrderId)
+		// exchangeInstance.requestCancelOrder(id)
 
 		await exchangeInstance.requestSellOrder()
 

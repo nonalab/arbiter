@@ -10,23 +10,23 @@ var _events = require('events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _crypto = require('crypto');
-
-var _crypto2 = _interopRequireDefault(_crypto);
-
 var _ws = require('ws');
 
 var _ws2 = _interopRequireDefault(_ws);
 
-var _arbiterUtils = require('arbiter-utils');
+var _crypto = require('crypto');
 
-var _ResponseHandler = require('./handlers/ResponseHandler');
+var _crypto2 = _interopRequireDefault(_crypto);
+
+var _arbiterUtil = require('arbiter-util');
+
+var _ResponseHandler = require('./handler/ResponseHandler');
 
 var _ResponseHandler2 = _interopRequireDefault(_ResponseHandler);
 
-var _SnapshotHandler = require('./handlers/SnapshotHandler');
+var _StreamingHandler = require('./handler/StreamingHandler');
 
-var _SnapshotHandler2 = _interopRequireDefault(_SnapshotHandler);
+var _StreamingHandler2 = _interopRequireDefault(_StreamingHandler);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -54,7 +54,7 @@ var ArbiterExchangeHitBTC = function (_EventEmitter) {
 
 		var responseHandler = new _ResponseHandler2.default(_this);
 
-		var snapshotHandler = new _SnapshotHandler2.default(_this);
+		var streamingHandler = new _StreamingHandler2.default(_this);
 
 		// Handle message and ping the appropriate
 		// litener from the container
@@ -63,7 +63,7 @@ var ArbiterExchangeHitBTC = function (_EventEmitter) {
 
 			if (responseHandler.evaluate(respJSON)) return;
 
-			if (snapshotHandler.evaluate(respJSON)) return;
+			if (streamingHandler.evaluate(respJSON)) return;
 
 			_this.emit('other', respJSON);
 		});
@@ -146,7 +146,7 @@ var ArbiterExchangeHitBTC = function (_EventEmitter) {
 						switch (_context2.prev = _context2.next) {
 							case 0:
 								_context2.next = 2;
-								return (0, _arbiterUtils.generateOrderId)();
+								return (0, _arbiterUtil.generateOrderId)();
 
 							case 2:
 								clientOrderId = _context2.sent;
@@ -208,9 +208,9 @@ var ArbiterExchangeHitBTC = function (_EventEmitter) {
 
 								self = this;
 								return _context3.abrupt('return', new Promise(function (resolve, reject) {
-									self.on('buy', function (data) {
-										if (data.clientOrderId === params.clientOrderId) {
-											resolve(data);
+									self.on('buy', function (order) {
+										if (order.id === params.clientOrderId) {
+											resolve(order);
 										}
 									});
 								}));
@@ -256,9 +256,9 @@ var ArbiterExchangeHitBTC = function (_EventEmitter) {
 
 								self = this;
 								return _context4.abrupt('return', new Promise(function (resolve, reject) {
-									self.on('sell', function (data) {
-										if (data.clientOrderId === params.clientOrderId) {
-											resolve(data);
+									self.on('sell', function (order) {
+										if (order.id === params.clientOrderId) {
+											resolve(order);
 										}
 									});
 								}));

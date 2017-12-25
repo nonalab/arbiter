@@ -1,18 +1,22 @@
 // Generic ticker for Arbiter
 export class Order {
 	constructor({
+		id,
 		symbol,
-		clientOrderId,
+		type,
 		side,
 		status,
 		quantity,
 		price,
 		timestamp = Date.now()
 	}) {
+		this.id = id;
+
 		this.symbol = symbol;
+		this.type = type;
 		this.side = side.toUpperCase();
 		this.status = status.toUpperCase();
-		this.clientOrderId = clientOrderId;
+
 		this.quantity = Number(quantity);
 		this.price = Number(price);
 		this.timestamp = new Date(timestamp);

@@ -11,8 +11,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 // Generic ticker for Arbiter
 var Order = exports.Order = function () {
 	function Order(_ref) {
-		var symbol = _ref.symbol,
-		    clientOrderId = _ref.clientOrderId,
+		var id = _ref.id,
+		    symbol = _ref.symbol,
+		    type = _ref.type,
 		    side = _ref.side,
 		    status = _ref.status,
 		    quantity = _ref.quantity,
@@ -22,10 +23,13 @@ var Order = exports.Order = function () {
 
 		_classCallCheck(this, Order);
 
+		this.id = id;
+
 		this.symbol = symbol;
+		this.type = type;
 		this.side = side.toUpperCase();
 		this.status = status.toUpperCase();
-		this.clientOrderId = clientOrderId;
+
 		this.quantity = Number(quantity);
 		this.price = Number(price);
 		this.timestamp = new Date(timestamp);

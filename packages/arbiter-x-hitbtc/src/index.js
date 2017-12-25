@@ -1,14 +1,15 @@
 import EventEmitter from 'events';
-import crypto from 'crypto';
 import WebSocket from 'ws';
+
+import crypto from 'crypto';
 
 import {
 	generateOrderId
-} from 'arbiter-utils';
+} from 'arbiter-util';
 
-import ResponseHandler from './handlers/ResponseHandler';
+import ResponseHandler from './handler/ResponseHandler';
 
-import SnapshotHandler from './handlers/SnapshotHandler';
+import StreamingHandler from './handler/StreamingHandler';
 
 export default class ArbiterExchangeHitBTC extends EventEmitter {
 
@@ -21,7 +22,7 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 
 		const responseHandler = new ResponseHandler(this);
 
-		const snapshotHandler = new SnapshotHandler(this);
+		const streamingHandler = new StreamingHandler(this);
 
 		// Handle message and ping the appropriate
 		// litener from the container
@@ -31,7 +32,7 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 			if(responseHandler.evaluate(respJSON))
 				return;
 
-			if(snapshotHandler.evaluate(respJSON))
+			if(streamingHandler.evaluate(respJSON))
 				return;
 
 			this.emit('other', respJSON)
@@ -106,9 +107,9 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		const self = this;
 
 		return new Promise(function (resolve, reject) {
-			self.on('buy', (data) => {
-				if(data.clientOrderId === params.clientOrderId) {
-					resolve(data)
+			self.on('buy', (order) => {
+				if(order.id === params.clientOrderId) {
+					resolve(order)
 				}
 			})
 		})
@@ -126,9 +127,9 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		const self = this;
 
 		return new Promise(function (resolve, reject) {
-			self.on('sell', (data) => {
-				if(data.clientOrderId === params.clientOrderId) {
-					resolve(data)
+			self.on('sell', (order) => {
+				if(order.id === params.clientOrderId) {
+					resolve(order)
 				}
 			})
 		})

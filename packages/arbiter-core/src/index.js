@@ -4,7 +4,7 @@ import ArbiterStore from 'arbiter-store';
 
 import {
 	taggedLog
-} from 'arbiter-utils';
+} from 'arbiter-util';
 
 import {
 	foreverProcess

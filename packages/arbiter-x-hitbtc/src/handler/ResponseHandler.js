@@ -2,6 +2,10 @@ import {
 	Balance
 } from 'arbiter-model';
 
+import {
+	Order
+} from '../model';
+
 export default class ResponseHandler {
 	constructor(event) {
 		this.event = event;
@@ -19,11 +23,11 @@ export default class ResponseHandler {
 	}
 
 	buy(data) {
-		this.event.emit('buy', data)
+		this.event.emit('buy', new Order(data))
 	}
 
 	sell(data) {
-		this.event.emit('sell', data)
+		this.event.emit('sell', new Order(data))
 	}
 
 	cancel(data) {

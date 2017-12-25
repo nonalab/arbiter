@@ -1,8 +1,8 @@
 import {
 	Ticker
-} from '../models/Ticker';
+} from '../model';
 
-export default class SnapshotHandler {
+export default class PublicChannelHandler {
 	constructor(event) {
 		this.event = event;
 
@@ -21,11 +21,11 @@ export default class SnapshotHandler {
 	}
 
 	ticker(pair, data) {
-		this.event['ticker'](new Ticker(pair, data))
+		this.event.emit('ticker', new Ticker(pair, data))
 	}
 
 	evaluate([chanId, data]) {
-		if (typeof data === 'string' || data.length < 2) {
+		if(typeof data === 'string' || data.length < 2) {
 			return false;
 		}
 
@@ -34,7 +34,7 @@ export default class SnapshotHandler {
 			pair
 		} = this.channelMap[chanId];
 
-		if (!this[channel]) {
+		if(!this[channel]) {
 			return false;
 		}
 

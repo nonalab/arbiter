@@ -6,6 +6,10 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _events = require('events');
+
+var _events2 = _interopRequireDefault(_events);
+
 var _ws = require('ws');
 
 var _ws2 = _interopRequireDefault(_ws);
@@ -14,9 +18,13 @@ var _cryptoJs = require('crypto-js');
 
 var _cryptoJs2 = _interopRequireDefault(_cryptoJs);
 
-var _SnapshotHandler = require('./handlers/SnapshotHandler');
+var _PublicChannelHandler = require('./handler/PublicChannelHandler');
 
-var _SnapshotHandler2 = _interopRequireDefault(_SnapshotHandler);
+var _PublicChannelHandler2 = _interopRequireDefault(_PublicChannelHandler);
+
+var _AuthenticatedChannelHandler = require('./handler/AuthenticatedChannelHandler');
+
+var _AuthenticatedChannelHandler2 = _interopRequireDefault(_AuthenticatedChannelHandler);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -24,27 +32,27 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var EVENTS = ['auth', 'ticker', 'balance', 'close', 'other'];
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-var ArbiterExchangeBitFinex = function () {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ArbiterExchangeBitFinex = function (_EventEmitter) {
+	_inherits(ArbiterExchangeBitFinex, _EventEmitter);
+
 	function ArbiterExchangeBitFinex() {
-		var _this = this;
-
 		var baseUrl = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'wss://api.bitfinex.com/ws/2';
 
 		_classCallCheck(this, ArbiterExchangeBitFinex);
 
-		this.event = {};
+		var _this = _possibleConstructorReturn(this, (ArbiterExchangeBitFinex.__proto__ || Object.getPrototypeOf(ArbiterExchangeBitFinex)).call(this));
 
-		EVENTS.map(function (name) {
-			return _this.event[name] = function () {};
-		});
-
-		var wsClient = this.wsClient = new _ws2.default(baseUrl, {
+		var wsClient = _this.wsClient = new _ws2.default(baseUrl, {
 			perMessageDeflate: false
 		});
 
-		var snapshotHandler = new _SnapshotHandler2.default(this.event);
+		var publicChannelHandler = new _PublicChannelHandler2.default(_this);
+
+		var authenticatedChannelHandler = new _AuthenticatedChannelHandler2.default(_this);
 
 		// Handle message and ping the appropriate
 		// litener from the container
@@ -52,25 +60,23 @@ var ArbiterExchangeBitFinex = function () {
 			var respJSON = JSON.parse(resp);
 
 			if (respJSON.event) {
-				snapshotHandler.register(respJSON);
-				return;
+				return publicChannelHandler.register(respJSON);
 			}
 
-			if (snapshotHandler.evaluate(respJSON)) return;
+			if (publicChannelHandler.evaluate(respJSON)) return;
 
-			_this.event['other'](respJSON);
+			if (authenticatedChannelHandler.evaluate(respJSON)) return;
+
+			_this.emit('other', respJSON);
 		});
 
-		wsClient.on('close', this.event['close']);
+		wsClient.on('close', function () {
+			return _this.emit('close');
+		});
+		return _this;
 	}
 
 	_createClass(ArbiterExchangeBitFinex, [{
-		key: 'on',
-		value: function on(eventName, callback) {
-			this.event[eventName] = callback;
-			return this;
-		}
-	}, {
 		key: 'open',
 		value: function () {
 			var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
@@ -82,7 +88,7 @@ var ArbiterExchangeBitFinex = function () {
 								wsClient = this.wsClient;
 								return _context.abrupt('return', new Promise(function (resolve, reject) {
 									wsClient.on('open', function () {
-										resolve();
+										return resolve();
 									});
 								}));
 
@@ -101,52 +107,76 @@ var ArbiterExchangeBitFinex = function () {
 			return open;
 		}()
 	}, {
+		key: 'send',
+		value: function send(socketMessage) {
+			if (!socketMessage) return;
+			this.wsClient.send(JSON.stringify(socketMessage));
+		}
+
+		/* Streaming APIs: */
+
+	}, {
 		key: 'subscribeToTicker',
 		value: function subscribeToTicker() {
-			var rawSymbol = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "ETHUSD";
+			var rawSymbol = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'ETHUSD';
 
-			var event = "subscribe";
-
-			var channel = "ticker";
-
-			var symbol = 't' + rawSymbol;
-
-			var socketMessage = { event: event, channel: channel, symbol: symbol };
-
-			this.wsClient.send(JSON.stringify(socketMessage));
+			this.send({
+				event: 'subscribe',
+				channel: 'ticker',
+				symbol: 't' + rawSymbol
+			});
 		}
 	}, {
 		key: 'authenticate',
-		value: function authenticate(_ref2) {
-			var key = _ref2.key,
-			    secret = _ref2.secret;
+		value: function () {
+			var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(_ref2) {
+				var key = _ref2.key,
+				    secret = _ref2.secret;
+				var self, event, nonce, payload, filter, signature;
+				return regeneratorRuntime.wrap(function _callee2$(_context2) {
+					while (1) {
+						switch (_context2.prev = _context2.next) {
+							case 0:
+								self = this;
+								event = 'auth';
+								nonce = Date.now() + Math.random().toString();
+								payload = 'AUTH' + nonce;
+								filter = ['trading', 'wallet', 'balance'];
+								signature = _cryptoJs2.default.HmacSHA384(payload, secret).toString(_cryptoJs2.default.enc.Hex);
 
-			var event = "auth";
 
-			var method = "login";
+								this.send({
+									event: event,
+									filter: filter,
+									apiKey: key,
+									authSig: signature,
+									authNonce: nonce,
+									authPayload: payload
+								});
 
-			var nonce = Date.now() + Math.random().toString();
+								return _context2.abrupt('return', new Promise(function (resolve, reject) {
+									self.on('auth', function (data) {
+										return data ? resolve() : reject();
+									});
+								}));
 
-			var payload = 'AUTH' + nonce;
+							case 8:
+							case 'end':
+								return _context2.stop();
+						}
+					}
+				}, _callee2, this);
+			}));
 
-			var filter = ['trading', 'wallet', 'balance'];
+			function authenticate(_x3) {
+				return _ref3.apply(this, arguments);
+			}
 
-			var signature = _cryptoJs2.default.HmacSHA384(payload, secret).toString(_cryptoJs2.default.enc.Hex);
-
-			var socketMessage = {
-				event: event,
-				filter: filter,
-				apiKey: key,
-				authSig: signature,
-				authNonce: nonce,
-				authPayload: payload
-			};
-
-			this.wsClient.send(JSON.stringify(socketMessage));
-		}
+			return authenticate;
+		}()
 	}]);
 
 	return ArbiterExchangeBitFinex;
-}();
+}(_events2.default);
 
 exports.default = ArbiterExchangeBitFinex;

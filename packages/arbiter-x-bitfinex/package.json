@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "arbiter-model": "^1.0.0",
-    "arbiter-utils": "^1.0.0",
+    "arbiter-util": "^1.0.0",
     "bufferutil": "^3.0.3",
     "crypto-js": "^3.1.9-1",
     "utf-8-validate": "^3.0.4",

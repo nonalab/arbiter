@@ -16,7 +16,7 @@
     "babel-preset-env": "^1.6.1"
   },
   "dependencies": {
-    "arbiter-utils": "^1.0.0",
+    "arbiter-util": "^1.0.0",
     "fs-extra": "^4.0.2"
   }
 }

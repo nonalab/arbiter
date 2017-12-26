@@ -23,9 +23,19 @@ async function main() {
 
 		await exchangeInstance.open();
 
-		// exchangeInstance.authenticate(creds);
+		await exchangeInstance.authenticate(creds);
+
+		taggedLog('AUTH', 'SUCCESS');
 
 		exchangeInstance.subscribeToTicker()
+
+		// const {id} = await exchangeInstance.requestBuyOrder()
+        //
+		// await wait(2000);
+        //
+		// exchangeInstance.requestCancelOrder(id)
+
+		// await exchangeInstance.requestSellOrder()
 
 	} catch(e) {
 		taggedLog('ERROR', e)

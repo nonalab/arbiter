@@ -1,6 +1,7 @@
 import {
 	Ticker,
-	Balance
+	Balance,
+	Order
 } from '../model';
 
 export default class AuthenticatedChannelHandler {
@@ -20,27 +21,38 @@ export default class AuthenticatedChannelHandler {
 
 	balance(data) {
 		const validBalances =
-			data.filter(([type])=>type==='exchange')
-				.map(item => new Balance(item))
+			data.filter(([type]) => type === 'exchange')
+			.map(item => new Balance(item))
 
 		this.event.emit('balance', validBalances)
 	}
 
+	order(data) {
+		this.event.emit('order', new Order(data))
+	}
+
+	orders(data) {
+		const orders = data.map((order) => new Order(order))
+
+		this.event.emit('orders', orders)
+	}
+
 	auth(chanSymbol, data) {
 
-		switch (chanSymbol) {
-			case 'ws':
+		switch(chanSymbol) {
+		case 'ws':
 			this.event.emit('auth')
 
+			this.balance(data)
 			return true
-			case 'ps':
-
-				return true
-			case 'os':
-
-				return true
-			default:
-				return false
+		case 'os':
+			this.orders(data)
+			return true
+		case 'on':
+			this.order(data)
+			return true
+		default:
+			return false
 		}
 	}
 

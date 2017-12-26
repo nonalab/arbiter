@@ -22,6 +22,13 @@ export async function generateOrderId(size = 16) {
 	});
 }
 
+export function makeEnum(array) {
+	return array.reduce((p,c)=> {
+		p[c] = c
+		return p
+	}, {})
+};
+
 export function tickerListener(ticker) {
 	taggedLog(`TICKER - ${ticker.symbol}`, ticker.toString())
 }

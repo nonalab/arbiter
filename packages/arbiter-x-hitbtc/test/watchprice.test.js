@@ -29,13 +29,15 @@ async function main() {
 
 		await exchangeInstance.authenticate(creds);
 
+		taggedLog('AUTH', 'SUCCESS');
+
 		exchangeInstance.subscribeToReports()
 
 		exchangeInstance.requestTradingBalance()
 
 		exchangeInstance.subscribeToTicker()
 
-		await exchangeInstance.requestBuyOrder()
+		const {id} = await exchangeInstance.requestBuyOrder()
 
 		await wait(2000);
 

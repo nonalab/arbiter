@@ -94,6 +94,13 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		return params;
 	}
 
+	async waitFor(eventName) {
+		const self = this;
+		return new Promise(function(resolve, reject) {
+			self.once(eventName, resolve)
+		});
+	}
+
 	async requestBuyOrder({
 		symbol = 'ETHUSD',
 		quantity = 0.01,
@@ -108,15 +115,7 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 			params
 		})
 
-		const self = this;
-
-		return new Promise(function (resolve, reject) {
-			self.on('buy', (order) => {
-				if(order.id === params.clientOrderId) {
-					resolve(order)
-				}
-			})
-		})
+		return params;
 	}
 
 	async requestSellOrder({
@@ -132,15 +131,7 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 			params
 		})
 
-		const self = this;
-
-		return new Promise(function (resolve, reject) {
-			self.on('sell', (order) => {
-				if(order.id === params.clientOrderId) {
-					resolve(order)
-				}
-			})
-		})
+		return params;
 	}
 
 	requestCancelOrder(clientOrderId) {
@@ -165,8 +156,6 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		key,
 		secret
 	}) {
-		const self = this;
-
 		const id = 'auth';
 		const method = 'login';
 		const algo = 'HS256';
@@ -190,8 +179,6 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 			},
 		})
 
-		return new Promise(function (resolve, reject) {
-			self.on('auth', data => data ? resolve() : reject())
-		})
+		return this.waitFor('auth')
 	}
 }

@@ -89,27 +89,23 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 		return params;
 	}
 
+	async waitFor(eventName) {
+		const self = this;
+		return new Promise(function(resolve, reject) {
+			self.once(eventName, resolve)
+		});
+	}
+
 	async requestBuyOrder({
 		symbol = 'ETHUSD',
 		quantity = 0.04,
 		price = 0
 	}) {
-		console.log(symbol, quantity, price);
-
 		const params = this.makeOrderParams(`t${symbol}`, `${quantity}`, price)
 
 		this.send([0, "on", null, params])
 
-		const self = this;
-
-		return new Promise(function (resolve, reject) {
-			self.on('buy', (order) => {
-				console.log(order);
-				if(order.cid === params.cid) {
-					resolve(order)
-				}
-			})
-		})
+		return params;
 	}
 
 	async requestSellOrder({
@@ -121,16 +117,7 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 
 		this.send([0, "on", null, params])
 
-		const self = this;
-
-		return new Promise(function (resolve, reject) {
-			self.on('sell', (order) => {
-				console.log(order);
-				if(order.cid === params.cid) {
-					resolve(order)
-				}
-			})
-		})
+		return params;
 	}
 
 	requestCancelOrder(id) {
@@ -179,9 +166,7 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 			authPayload: payload,
 		})
 
-		return new Promise(function (resolve, reject) {
-			self.on('auth', resolve)
-		})
+		return this.waitFor('auth')
 	}
 
 }

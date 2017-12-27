@@ -3,7 +3,8 @@ import {
 	otherListener,
 	tickerListener,
 	orderListener,
-	taggedLog
+	taggedLog,
+	wait
 } from 'arbiter-util';
 
 import ArbiterExchange from '../src';
@@ -15,7 +16,7 @@ async function main() {
 
 	exchangeInstance
 		// .on('auth', authListener)
-		// .on('order', orderListener)
+		.on('order', orderListener)
 		.on('other', otherListener)
 		.on('ticker', tickerListener)
 
@@ -29,13 +30,17 @@ async function main() {
 
 		exchangeInstance.subscribeToTicker()
 
-		// const {id} = await exchangeInstance.requestBuyOrder()
+		// const {
+		// 	id
+		// } = await exchangeInstance.requestBuyOrder({
+		// 	price: 300
+		// })
         //
 		// await wait(2000);
         //
 		// exchangeInstance.requestCancelOrder(id)
 
-		// await exchangeInstance.requestSellOrder()
+		await exchangeInstance.requestSellOrder()
 
 	} catch(e) {
 		taggedLog('ERROR', e)

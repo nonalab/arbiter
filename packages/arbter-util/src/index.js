@@ -13,7 +13,7 @@ export function taggedLog(tag, info) {
 	console.log(info);
 }
 
-export async function generateOrderId(size = 16) {
+export async function generateRandomBytesHex(size = 16) {
 	return new Promise(function (resolve, reject) {
 		crypto.randomBytes(size, (err, buf) => {
 			if(err) reject(err);
@@ -22,8 +22,15 @@ export async function generateOrderId(size = 16) {
 	});
 }
 
+export function generateRandomInt(size = 9) {
+	return Number (Math.random()
+	.toString()
+	.slice(2, 2 + size))
+}
+
+
 export function makeEnum(array) {
-	return array.reduce((p,c)=> {
+	return array.reduce((p, c) => {
 		p[c] = c
 		return p
 	}, {})

@@ -4,7 +4,7 @@ import WebSocket from 'ws';
 import crypto from 'crypto-js';
 
 import {
-	generateOrderId
+	generateRandomInt
 } from 'arbiter-util';
 
 import PublicChannelHandler from './handler/PublicChannelHandler';
@@ -29,8 +29,8 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 		// litener from the container
 		wsClient.on('message', (resp) => {
 			const respJSON = JSON.parse(resp);
-
 			if(respJSON.event) {
+				console.log(respJSON);
 				return publicChannelHandler.register(respJSON);
 			}
 
@@ -61,84 +61,82 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 	}
 
 	/* Streaming APIs: */
-	subscribeToTicker(rawSymbol = 'ETHUSD') {
+	subscribeToTicker(symbol = 'ETHUSD') {
 		this.send({
 			event: 'subscribe',
 			channel: 'ticker',
-			symbol: `t${rawSymbol}`,
+			symbol: `t${symbol}`,
 		})
 	}
 
 	/* REST-like APIs: */
-	async makeOrderParams(side, symbol, quantity, price) {
-		const clientOrderId = await generateOrderId()
+	makeOrderParams(symbol, amount, price) {
+		const cid = generateRandomInt(36)
 
 		const params = {
-			side,
+			cid,
 			symbol,
-			quantity,
-			clientOrderId,
+			amount
 		}
 
 		if(!price) {
-			params.type = 'market'
-			params.timeInForce = 'IOC'
+			params.type = 'EXCHANGE MARKET'
 		} else {
-			params.price = price
+			params.type = 'EXCHANGE LIMIT'
+			params.price = '' + price
 		}
 
 		return params;
 	}
-	
-	async requestBuyOrder(symbol = 'ETHUSD', quantity = 0.01, price = 0) {
 
-		const params = await this.makeOrderParams('buy', symbol, quantity, price, )
+	async requestBuyOrder({
+		symbol = 'ETHUSD',
+		quantity = 0.04,
+		price = 0
+	}) {
+		console.log(symbol, quantity, price);
 
-		this.send({
-			id: 'buy',
-			method: 'newOrder',
-			params
-		})
+		const params = this.makeOrderParams(`t${symbol}`, `${quantity}`, price)
+
+		this.send([0, "on", null, params])
 
 		const self = this;
 
 		return new Promise(function (resolve, reject) {
 			self.on('buy', (order) => {
-				if(order.id === params.clientOrderId) {
+				console.log(order);
+				if(order.cid === params.cid) {
 					resolve(order)
 				}
 			})
 		})
 	}
 
-	async requestSellOrder(symbol = 'ETHUSD', quantity = 0.01, price = 0) {
-		const params = await this.makeOrderParams('sell', symbol, quantity, price, )
+	async requestSellOrder({
+		symbol = 'ETHUSD',
+		quantity = 0.04,
+		price = 0
+	}) {
+		const params = await this.makeOrderParams(`t${symbol}`, -1 * quantity, price, )
 
-		this.send({
-			id: 'sell',
-			method: 'newOrder',
-			params
-		})
+		this.send([0, "on", null, params])
 
 		const self = this;
 
 		return new Promise(function (resolve, reject) {
 			self.on('sell', (order) => {
-				if(order.id === params.clientOrderId) {
+				console.log(order);
+				if(order.cid === params.cid) {
 					resolve(order)
 				}
 			})
 		})
 	}
 
-	requestCancelOrder(clientOrderId) {
-		this.send({
-			id: 'cancel',
-			method: 'cancelOrder',
-			params: {
-				clientOrderId
-			}
-		})
+	requestCancelOrder(id) {
+		this.send([0, 'oc', null, {
+			id
+		}])
 	}
 
 	requestTradingBalance() {

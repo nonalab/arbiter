@@ -6,11 +6,12 @@ import {
 } from 'arbiter-model'
 
 const OrderTypeMap = {
-	... OrderType
+	'EXCHANGE LIMIT': OrderType.LIMIT,
+	'EXCHANGE MARKET': OrderType.MARKET,
 }
 
 const OrderStatusMap = {
-	... OrderStatus,
+	...OrderStatus,
 	EXECUTED: OrderStatus.FILLED
 }
 

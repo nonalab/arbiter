@@ -1,4 +1,7 @@
-# NOTES:
+# Setup
+
+
+# Notes
 
 ## BITFINEX:
 

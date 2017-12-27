@@ -4,7 +4,7 @@ import WebSocket from 'ws';
 import crypto from 'crypto';
 
 import {
-	generateOrderId
+	generateRandomBytesHex
 } from 'arbiter-util';
 
 import ResponseHandler from './handler/ResponseHandler';
@@ -75,7 +75,7 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 	/* REST-like APIs: */
 
 	async makeOrderParams(side, symbol, quantity, price) {
-		const clientOrderId = await generateOrderId()
+		const clientOrderId = await generateRandomBytesHex()
 
 		const params = {
 			side,
@@ -94,7 +94,11 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		return params;
 	}
 
-	async requestBuyOrder(symbol = 'ETHUSD', quantity = 0.01, price = 0) {
+	async requestBuyOrder({
+		symbol = 'ETHUSD',
+		quantity = 0.01,
+		price = 0
+	}) {
 
 		const params = await this.makeOrderParams('buy', symbol, quantity, price, )
 
@@ -115,7 +119,11 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		})
 	}
 
-	async requestSellOrder(symbol = 'ETHUSD', quantity = 0.01, price = 0) {
+	async requestSellOrder({
+		symbol = 'ETHUSD',
+		quantity = 0.01,
+		price = 0
+	}) {
 		const params = await this.makeOrderParams('sell', symbol, quantity, price, )
 
 		this.send({

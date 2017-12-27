@@ -117,7 +117,7 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 		quantity = 0.04,
 		price = 0
 	}) {
-		const params = await this.makeOrderParams(`t${symbol}`, -1 * quantity, price, )
+		const params = await this.makeOrderParams(`t${symbol}`, `${-1 * quantity}`, price)
 
 		this.send([0, "on", null, params])
 

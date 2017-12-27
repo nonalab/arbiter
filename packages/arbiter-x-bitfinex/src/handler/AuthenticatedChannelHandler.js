@@ -32,9 +32,13 @@ export default class AuthenticatedChannelHandler {
 	}
 
 	orders(data) {
-		const orders = data.map((order) => new Order(order))
+		const orders = data.map((d) => new Order(d))
 
 		this.event.emit('orders', orders)
+	}
+
+	tradeExecuted(data) {
+
 	}
 
 	auth(chanSymbol, data) {
@@ -42,13 +46,14 @@ export default class AuthenticatedChannelHandler {
 		switch(chanSymbol) {
 		case 'ws':
 			this.event.emit('auth')
-
 			this.balance(data)
 			return true
 		case 'os':
 			this.orders(data)
 			return true
 		case 'on':
+		case 'ou':
+		case 'oc':
 			this.order(data)
 			return true
 		default:
@@ -62,6 +67,8 @@ export default class AuthenticatedChannelHandler {
 		if(!this[channel]) {
 			return false;
 		}
+
+		// console.log(chanSymbol, data);
 
 		return this[channel](chanSymbol, data);
 	}

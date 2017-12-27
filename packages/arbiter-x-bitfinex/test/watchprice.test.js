@@ -30,17 +30,18 @@ async function main() {
 
 		exchangeInstance.subscribeToTicker()
 
-		// const {
-		// 	id
-		// } = await exchangeInstance.requestBuyOrder({
-		// 	price: 300
-		// })
+		const {
+			id
+		} = await exchangeInstance.requestBuyOrder({
+			price: 300
+		})
         //
 		// await wait(2000);
         //
 		// exchangeInstance.requestCancelOrder(id)
 
-		await exchangeInstance.requestSellOrder()
+		// await exchangeInstance.requestSellOrder({
+		// })
 
 	} catch(e) {
 		taggedLog('ERROR', e)

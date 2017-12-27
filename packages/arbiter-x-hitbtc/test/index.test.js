@@ -14,52 +14,38 @@ import ArbiterExchange from '../src';
 
 import creds from '../credentials.json';
 
-test('Subscribe to ticker', async t => {
+const exchangeInstance = new ArbiterExchange()
 
-	const exchangeInstance = new ArbiterExchange();
-
-    exchangeInstance
+test.before(async t => {
+	exchangeInstance
+		// .on('balance', balanceListener)
 		// .on('other', otherListener)
-		.on('error', errorListener)
+		.on('error', () => {
+			t.fail()
+		})
 
-	try {
-		await exchangeInstance.open()
+	await exchangeInstance.open()
+})
 
-		exchangeInstance.subscribeToTicker('ETHUSD')
+test.after(async t => {
+	await exchangeInstance.close()
+})
 
-        const ticker = await exchangeInstance.waitFor('ticker')
 
-        t.is(ticker.symbol, 'ETHUSD')
+test('Subscribe to ticker', async t => {
+	exchangeInstance.subscribeToTicker('ETHUSD')
 
-        await exchangeInstance.close()
+	const ticker = await exchangeInstance.waitFor('ticker')
 
-	} catch(e) {
-		taggedLog('ERROR', e);
-	}
+	t.is(ticker.symbol, 'ETHUSD')
 });
 
 test('Authenticate and get balance', async t => {
+	await exchangeInstance.authenticate(creds)
 
-	const exchangeInstance = new ArbiterExchange();
+	taggedLog('AUTH', 'SUCCESS')
 
-	exchangeInstance
-		// .on('other', otherListener)
-		.on('error', errorListener)
-        .on('balance', balanceListener)
+	exchangeInstance.requestTradingBalance()
 
-	try {
-		await exchangeInstance.open()
-
-		await exchangeInstance.authenticate(creds)
-
-		taggedLog('AUTH', 'SUCCESS')
-
-		exchangeInstance.requestTradingBalance()
-
-        await t.notThrows(exchangeInstance.waitFor('balance'));
-
-        await exchangeInstance.close()
-	} catch(e) {
-		taggedLog('ERROR', e);
-	}
+	await t.notThrows(exchangeInstance.waitFor('balance'));
 });

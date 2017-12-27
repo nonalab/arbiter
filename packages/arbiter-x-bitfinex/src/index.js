@@ -43,16 +43,25 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 			this.emit('other', respJSON)
 		})
 
+		wsClient.on('open', () => this.emit('open'))
 		wsClient.on('close', () => this.emit('close'))
+		wsClient.on('error', (error) => this.emit('error', error))
+	}
+
+	async waitFor(eventName) {
+		const self = this;
+		return new Promise(function (resolve, reject) {
+			self.once(eventName, resolve)
+		});
 	}
 
 	async open() {
-		const {
-			wsClient
-		} = this;
-		return new Promise(function (resolve, reject) {
-			wsClient.on('open', () => resolve())
-		});
+		return this.waitFor('open')
+	}
+
+	async close() {
+		this.wsClient.close()
+		return this.waitFor('close')
 	}
 
 	send(socketMessage) {
@@ -68,6 +77,8 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 			symbol: `t${symbol}`,
 		})
 	}
+
+	subscribeToReports() {}
 
 	/* REST-like APIs: */
 	makeOrderParams(symbol, amount, price) {
@@ -87,13 +98,6 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 		}
 
 		return params;
-	}
-
-	async waitFor(eventName) {
-		const self = this;
-		return new Promise(function(resolve, reject) {
-			self.once(eventName, resolve)
-		});
 	}
 
 	async requestBuyOrder({

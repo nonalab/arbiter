@@ -5,15 +5,18 @@
   "main": "index.js",
   "scripts": {
     "build": "babel src -d lib",
-    "test": "babel-node test/watchprice.test.js"
+    "test": "ava"
   },
   "keywords": [],
   "author": "@louisgv",
   "license": "LAB",
   "devDependencies": {
+    "ava": "^0.24.0",
     "babel-cli": "^6.26.0",
-        "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-env": "^1.6.1"
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-register": "^6.26.0"
   },
   "dependencies": {
     "arbiter-model": "^1.0.0",
@@ -22,5 +25,12 @@
     "crypto-js": "^3.1.9-1",
     "utf-8-validate": "^3.0.4",
     "ws": "^3.3.1"
+  },
+  "ava": {
+      "require": [
+          "babel-register",
+          "babel-polyfill"
+      ],
+      "babel": "inherit"
   }
 }

@@ -5,8 +5,8 @@
     "main": "index.js",
     "scripts": {
         "build": "babel src -d lib",
-        "test": "ava",
-        "watch": "ava -w"
+        "test": "ava -s",
+        "watch": "ava -s -w"
     },
     "keywords": [],
     "author": "@louisgv",

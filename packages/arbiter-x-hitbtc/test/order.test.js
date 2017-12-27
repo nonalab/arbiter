@@ -10,77 +10,59 @@ import ArbiterExchange from '../src';
 
 import creds from '../credentials.json';
 
-test.serial('Create and cancel BUY order', async t => {
+const exchangeInstance = new ArbiterExchange();
 
-	const exchangeInstance = new ArbiterExchange();
-
+test.before(async t => {
 	exchangeInstance
 		// .on('other', otherListener)
-		.on('error', errorListener)
-
-	try {
-		await exchangeInstance.open()
-
-		await exchangeInstance.authenticate(creds)
-
-		exchangeInstance.subscribeToReports()
-
-		await exchangeInstance.requestBuyOrder({
-			price: 10
+		.on('error', () => {
+			t.fail()
 		})
 
-		const order = await exchangeInstance.waitFor('order')
+	await exchangeInstance.open()
 
-		t.is(order.status, 'ACTIVE')
+	await exchangeInstance.authenticate(creds)
 
-		exchangeInstance.requestCancelOrder(order.id)
+	exchangeInstance.subscribeToReports()
+});
 
-		const canceledOrder = await exchangeInstance.waitFor('order')
+test.after(async t => {
+	await exchangeInstance.close()
+});
 
-		t.is(canceledOrder.status, 'CANCELED')
+test('Create and cancel BUY order', async t => {
+	await exchangeInstance.requestBuyOrder({
+		price: 10
+	})
 
-		t.is(order.id, canceledOrder.id)
+	const order = await exchangeInstance.waitFor('order')
 
-		await exchangeInstance.close()
-	} catch(e) {
-		taggedLog('ERROR', e);
-	}
+	t.is(order.status, 'ACTIVE')
+
+	exchangeInstance.requestCancelOrder(order.id)
+
+	const canceledOrder = await exchangeInstance.waitFor('order')
+
+	t.is(canceledOrder.status, 'CANCELED')
+
+	t.is(order.id, canceledOrder.id)
 });
 
 
-test.serial('Create and cancel SELL order', async t => {
+test('Create and cancel SELL order', async t => {
+	await exchangeInstance.requestSellOrder({
+		price: 10000
+	})
 
-	const exchangeInstance = new ArbiterExchange();
+	const order = await exchangeInstance.waitFor('order')
 
-	exchangeInstance
-		// .on('other', otherListener)
-		.on('error', errorListener)
+	t.is(order.status, 'ACTIVE')
 
-	try {
-		await exchangeInstance.open()
+	exchangeInstance.requestCancelOrder(order.id)
 
-		await exchangeInstance.authenticate(creds)
+	const canceledOrder = await exchangeInstance.waitFor('order')
 
-		exchangeInstance.subscribeToReports()
+	t.is(canceledOrder.status, 'CANCELED')
 
-		await exchangeInstance.requestSellOrder({
-			price: 10000
-		})
-
-		const order = await exchangeInstance.waitFor('order')
-
-		t.is(order.status, 'ACTIVE')
-
-		exchangeInstance.requestCancelOrder(order.id)
-
-		const canceledOrder = await exchangeInstance.waitFor('order')
-
-		t.is(canceledOrder.status, 'CANCELED')
-
-		t.is(order.id, canceledOrder.id)
-
-		await exchangeInstance.close()
-	} catch(e) {
-		taggedLog('ERROR', e);
-	}
+	t.is(order.id, canceledOrder.id)
 });

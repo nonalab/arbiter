@@ -1,0 +1,42 @@
+{
+  "name": "arbiter-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "manual": "babel-node src/manual.js",
+    "test": "ava -s | tap-nyan",
+    "watch": "ava -s -w"
+  },
+  "keywords": [],
+  "author": "@louisgv",
+   "license" : "SEE LICENSE IN ../../LICENSE",
+   "devDependencies": {
+    "ava": "^0.24.0",
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-register": "^6.26.0",
+    "tap-nyan": "^1.1.0"
+  },
+  "dependencies": {
+    "arbiter-model": "^1.0.0",
+    "arbiter-store": "^1.0.0",
+    "arbiter-util": "^1.0.0",
+    "arbiter-x-bitfinex": "^1.0.0",
+    "arbiter-x-hitbtc": "^1.0.0",
+    "bufferutil": "^3.0.3",
+    "crypto-js": "^3.1.9-1",
+    "utf-8-validate": "^3.0.4",
+    "ws": "^3.3.1"
+  },
+  "ava": {
+    "tap": true,
+    "require": [
+      "babel-register",
+      "babel-polyfill"
+    ],
+    "babel": "inherit"
+  }
+}

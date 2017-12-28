@@ -9,15 +9,18 @@ export default class PublicChannelHandler {
 		this.channelMap = {}
 	}
 
-	register({
-		channel,
-		chanId,
-		pair
-	}) {
-		this.channelMap[chanId] = {
-			channel,
-			pair
-		};
+	register(data) {
+		switch(data.event) {
+		case 'error':
+			this.event.emit('error', data)
+			break;
+		case 'subscribed':
+			this.channelMap[data.chanId] = {
+				...data
+			}
+		default:
+			this.event.emit('other', data)
+		}
 	}
 
 	ticker(pair, data) {

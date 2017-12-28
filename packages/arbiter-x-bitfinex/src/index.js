@@ -29,16 +29,16 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 		// litener from the container
 		wsClient.on('message', (resp) => {
 			const respJSON = JSON.parse(resp);
-			if(respJSON.event) {
-				console.log(respJSON);
-				return publicChannelHandler.register(respJSON);
-			}
+			// console.log(respJSON);
+
+			if(respJSON.event)
+				return publicChannelHandler.register(respJSON)
 
 			if(publicChannelHandler.evaluate(respJSON))
-				return;
+				return
 
 			if(authenticatedChannelHandler.evaluate(respJSON))
-				return;
+				return
 
 			this.emit('other', respJSON)
 		})
@@ -130,13 +130,7 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 		}])
 	}
 
-	requestTradingBalance() {
-		this.send({
-			id: 'balance',
-			method: 'getTradingBalance',
-			params: {}
-		})
-	}
+	requestTradingBalance() {}
 
 	async authenticate({
 		key,

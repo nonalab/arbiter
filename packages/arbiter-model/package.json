@@ -9,7 +9,7 @@
   },
   "keywords": [],
   "author": "@louisgv",
-  "license": "ISC",
+  "license" : "SEE LICENSE IN ../../LICENSE",
   "devDependencies": {
     "ava": "^0.24.0",
     "babel-cli": "^6.26.0",

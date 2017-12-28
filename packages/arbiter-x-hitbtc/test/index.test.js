@@ -20,9 +20,7 @@ test.before(async t => {
 	exchangeInstance
 		// .on('balance', balanceListener)
 		// .on('other', otherListener)
-		.on('error', () => {
-			t.fail()
-		})
+		.on('error', console.error)
 
 	await exchangeInstance.open()
 })
@@ -41,11 +39,13 @@ test('Subscribe to ticker', async t => {
 });
 
 test('Authenticate and get balance', async t => {
-	await exchangeInstance.authenticate(creds)
+    const balance = exchangeInstance.waitFor('balance');
 
-	taggedLog('AUTH', 'SUCCESS')
+    await exchangeInstance.authenticate(creds)
 
-	exchangeInstance.requestTradingBalance()
+    taggedLog('AUTH', 'SUCCESS')
 
-	await t.notThrows(exchangeInstance.waitFor('balance'));
+    exchangeInstance.requestTradingBalance()
+
+    await t.notThrows(balance);
 });

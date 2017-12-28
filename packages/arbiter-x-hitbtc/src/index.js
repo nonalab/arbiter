@@ -3,6 +3,10 @@ import WebSocket from 'ws';
 
 import crypto from 'crypto';
 
+import base64 from 'base-64';
+
+import fetch from 'node-fetch';
+
 import {
 	generateRandomBytesHex
 } from 'arbiter-util';
@@ -13,10 +17,12 @@ import StreamingHandler from './handler/StreamingHandler';
 
 export default class ArbiterExchangeHitBTC extends EventEmitter {
 
-	constructor(baseUrl = 'wss://api.hitbtc.com/api/2/ws') {
+	constructor(wsUrl = 'wss://api.hitbtc.com/api/2/ws', restUrl = 'https://api.hitbtc.com/api/2') {
 		super()
 
-		const wsClient = this.wsClient = new WebSocket(baseUrl, {
+		this.restUrl = restUrl;
+
+		const wsClient = this.wsClient = new WebSocket(wsUrl, {
 			perMessageDeflate: false
 		});
 
@@ -45,7 +51,7 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 
 	async waitFor(eventName) {
 		const self = this;
-		return new Promise(function(resolve, reject) {
+		return new Promise(function (resolve, reject) {
 			self.once(eventName, resolve)
 		});
 	}
@@ -63,6 +69,34 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		if(!socketMessage) return;
 		this.wsClient.send(JSON.stringify(socketMessage))
 	}
+
+	async rest(method, route, body) {
+		const {
+			restUrl,
+			restHeaders
+		} = this;
+
+		const resp = await fetch(`${restUrl}/${route}`, {
+			method,
+			headers: restHeaders,
+			body
+		})
+
+		const respJSON = await resp.json()
+
+		return respJSON
+	}
+
+	async get(route, body) {
+		return this.rest('GET', route, body)
+	}
+
+	async post(route, body) {
+		return this.rest('POST', route, body)
+	}
+
+	/* Wallet APIs: */
+
 
 	/* Streaming APIs: */
 	subscribeToReports() {
@@ -158,6 +192,12 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		key,
 		secret
 	}) {
+		this.restHeaders = {
+			'Accept': 'application/json',
+			'Content-Type': 'application/json',
+			'Authorization': 'Basic ' + base64.encode(`${key}:${secret}`)
+		}
+
 		const id = 'auth';
 		const method = 'login';
 		const algo = 'HS256';

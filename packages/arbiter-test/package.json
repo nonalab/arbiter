@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "manual": "babel-node src/manual.js",
-    "test": "ava -s | tap-nyan",
+    "test": "ava -s --verbose",
     "watch": "ava -s -w"
   },
   "keywords": [],
@@ -17,8 +17,7 @@
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
-    "babel-register": "^6.26.0",
-    "tap-nyan": "^1.1.0"
+    "babel-register": "^6.26.0"
   },
   "dependencies": {
     "arbiter-model": "^1.0.0",
@@ -32,7 +31,6 @@
     "ws": "^3.3.1"
   },
   "ava": {
-    "tap": true,
     "require": [
       "babel-register",
       "babel-polyfill"

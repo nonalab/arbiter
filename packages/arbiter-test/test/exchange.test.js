@@ -9,7 +9,8 @@ const exchanges = [
 
 const exchangeTests = [
     'auth',
-    'order'
+    'order',
+	// 'wallet'
 ].map(getExchangeMacro)
 
 exchanges.map((exchange) => {

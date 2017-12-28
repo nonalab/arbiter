@@ -10,21 +10,20 @@ const exchanges = [
 const exchangeTests = [
     'auth',
     'order'
-].map((macro) => getExchangeMacro(macro)
-	.default
-)
+].map(getExchangeMacro)
 
 exchanges.map((exchange) => {
 	const exchangeClass = getExchangeClass(exchange)
-		.default
 
-    exchangeTests.map((test) => test(exchange, new exchangeClass(), store))
+	exchangeTests.map((test) => test(exchange, new exchangeClass(), store))
 })
 
 function getExchangeClass(exchange) {
-	return require(`arbiter-x-${exchange}`)
+	const exchangeClass = require(`arbiter-x-${exchange}`)
+	return exchangeClass.default
 }
 
-function getExchangeMacro(macro) {
-	return require(`../src/exchange-macro/${macro}`)
+function getExchangeMacro(name) {
+	const macro = require(`../src/exchange-macro/${name}`)
+	return macro.default
 }

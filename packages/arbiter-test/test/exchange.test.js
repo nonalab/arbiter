@@ -1,3 +1,8 @@
+import {
+	getExchangeClass,
+	getExchangeMacro
+} from '../src/util';
+
 import ArbiterStore from 'arbiter-store';
 
 const store = new ArbiterStore(['credential'])
@@ -18,13 +23,3 @@ exchanges.map((exchange) => {
 
 	exchangeTests.map((test) => test(exchange, new exchangeClass(), store))
 })
-
-function getExchangeClass(exchange) {
-	const exchangeClass = require(`arbiter-x-${exchange}`)
-	return exchangeClass.default
-}
-
-function getExchangeMacro(name) {
-	const macro = require(`../src/exchange-macro/${name}`)
-	return macro.default
-}

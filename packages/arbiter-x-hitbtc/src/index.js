@@ -8,6 +8,7 @@ import base64 from 'base-64';
 import fetch from 'node-fetch';
 
 import {
+	wait,
 	generateRandomBytesHex
 } from 'arbiter-util';
 
@@ -46,9 +47,12 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 
 		wsClient.on('open', () => this.emit('open'))
 		wsClient.on('close', () => this.emit('close'))
-		wsClient.on('error', (error) => this.emit('error', error))
+		wsClient.on('error', (error) => this.emit('error', {
+			error
+		}))
 	}
 
+	/* Waiting Coroutine */
 	async waitFor(eventName) {
 		const self = this;
 		return new Promise(function (resolve, reject) {
@@ -56,6 +60,21 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		});
 	}
 
+	async waitForTransaction(id, pingOffset = 4500) {
+		const transaction = await this.get(`account/transactions/${id}`)
+
+		switch(transaction.status) {
+		case 'pending':
+
+			await wait(pingOffset)
+
+			return this.waitForTransaction(id, pingOffset)
+		default:
+			return transaction;
+		}
+	}
+
+	/* */
 	async open() {
 		return this.waitFor('open')
 	}
@@ -70,33 +89,41 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		this.wsClient.send(JSON.stringify(socketMessage))
 	}
 
-	async rest(method, route, body) {
-		const {
-			restUrl,
-			restHeaders
-		} = this;
+	async rest(method, route, data) {
+		try {
+			const {
+				restUrl,
+				restHeaders
+			} = this;
 
-		const resp = await fetch(`${restUrl}/${route}`, {
-			method,
-			headers: restHeaders,
-			body
-		})
+			const resp = await fetch(`${restUrl}/${route}`, {
+				method,
+				headers: restHeaders,
+				body: JSON.stringify(data)
+			})
 
-		const respJSON = await resp.json()
+			const respJSON = await resp.json()
 
-		return respJSON
+			if(respJSON.error) {
+				throw(respJSON.error)
+			} else {
+				return respJSON
+			}
+		} catch(error) {
+			this.emit('error', {
+				error
+			})
+			return null
+		}
 	}
 
-	async get(route, body) {
-		return this.rest('GET', route, body)
+	async get(route) {
+		return this.rest('GET', route)
 	}
 
 	async post(route, body) {
 		return this.rest('POST', route, body)
 	}
-
-	/* Wallet APIs: */
-
 
 	/* Streaming APIs: */
 	subscribeToReports() {
@@ -115,33 +142,67 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		})
 	}
 
-	/* REST-like APIs: */
+	/* REST APIs: */
 
-	async makeOrderParams(side, symbol, quantity, price) {
-		const clientOrderId = await generateRandomBytesHex()
+	async requestDepositAddress(currency = 'ETH') {
+		const data = await this.get(`account/crypto/address/${currency}`)
 
-		const params = {
-			side,
-			symbol,
-			quantity,
-			clientOrderId,
+		return data ? data.address : null;
+	}
+
+	async requestFundTransfer(currency, amount, type) {
+		const resp = await this.post(`account/transfer`, {
+			currency,
+			amount,
+			type
+		})
+
+		if (!resp) {
+			return null
 		}
 
-		if(!price) {
-			params.type = 'market'
-			params.timeInForce = 'IOC'
-		} else {
-			params.price = price
+		const transaction = await this.waitForTransaction(resp.id)
+
+		if(transaction.status === 'failed') {
+			return null
 		}
 
-		return params;
+		return transaction
+	}
+
+	async requestWithdrawCrypto({
+		currency = 'ETH',
+		amount = 0.02,
+		address = '0x74D5bCAF1ec7CF4BFAF4bb67D51D00dD821c5bF6',
+		serious = false
+	}) {
+
+		// Transfer the required fund from exchange to main wallet
+		const fundBankTx = await this.requestFundTransfer(currency, amount, 'exchangeToBank')
+
+		if(!fundBankTx || !serious) {
+			return null
+		}
+
+		// Send from main wallet to the designated
+		return this.post(`account/crypto/withdraw`, {
+			currency,
+			amount,
+			address
+		})
+	}
+
+	async requestFundToExchange(currency, quantity) {
+		// Transfer the required fund from exchange to main wallet
+		return this.requestFundTransfer(currency, quantity, 'bankToExchange')
 	}
 
 	async requestBuyOrder({
-		symbol = 'ETHUSD',
+		pair = ['EOS', 'ETH'],
 		quantity = 0.01,
 		price = 0
 	}) {
+		const symbol = pair.join('')
 
 		const params = await this.makeOrderParams('buy', symbol, quantity, price, )
 
@@ -151,14 +212,32 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 			params
 		})
 
-		return params;
+		const data = await Promise.race([
+			this.waitFor('order'),
+			this.waitFor('error')
+		])
+
+		if(data.error && data.error.code === 20001) {
+			// Insufficient fund:
+			const fundExchangeTx = await this.requestFundToExchange(pair[1], quantity)
+
+			if(!fundExchangeTx) {
+				return null;
+			} else {
+				return this.requestBuyOrder(pair, quantity, price)
+			}
+		}
+
+		return data;
 	}
 
 	async requestSellOrder({
-		symbol = 'ETHUSD',
+		pair = ['EOS', 'ETH'],
 		quantity = 0.01,
 		price = 0
 	}) {
+		const symbol = pair.join('')
+
 		const params = await this.makeOrderParams('sell', symbol, quantity, price, )
 
 		this.send({
@@ -167,7 +246,23 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 			params
 		})
 
-		return params;
+		const data = await Promise.race([
+			this.waitFor('order'),
+			this.waitFor('error')
+		])
+
+		if(data.error && data.error.code === 20001) {
+			// Insufficient fund:
+			const fundExchangeTx = await this.requestFundToExchange(pair[0], quantity)
+
+			if(!fundExchangeTx) {
+				return null;
+			} else {
+				return this.requestSellOrder(pair, quantity, price)
+			}
+		}
+
+		return data;
 	}
 
 	requestCancelOrder(clientOrderId) {
@@ -195,6 +290,7 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		this.restHeaders = {
 			'Accept': 'application/json',
 			'Content-Type': 'application/json',
+			'Connection': 'Keep-Alive',
 			'Authorization': 'Basic ' + base64.encode(`${key}:${secret}`)
 		}
 
@@ -222,5 +318,25 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		})
 
 		return this.waitFor('auth')
+	}
+
+	async makeOrderParams(side, symbol, quantity, price) {
+		const clientOrderId = await generateRandomBytesHex()
+
+		const params = {
+			side,
+			symbol,
+			quantity,
+			clientOrderId,
+		}
+
+		if(!price) {
+			params.type = 'market'
+			params.timeInForce = 'IOC'
+		} else {
+			params.price = price
+		}
+
+		return params;
 	}
 }

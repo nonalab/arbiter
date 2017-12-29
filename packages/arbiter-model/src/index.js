@@ -1,3 +1,3 @@
-export * from './Ticker';
-export * from './Balance';
-export * from './Order';
+export * from './model/Ticker';
+export * from './model/Balance';
+export * from './model/Order';

@@ -14,7 +14,7 @@ export default function (exchange, exchangeInstance, store) {
 		await exchangeInstance.close()
 	})
 
-	test('Subscribe to ticker', async t => {
+	test(`${exchange} - Subscribe to Ticker`, async t => {
 		exchangeInstance.subscribeToTicker('ETHUSD')
 
 		const ticker = await exchangeInstance.waitFor('ticker')
@@ -22,13 +22,13 @@ export default function (exchange, exchangeInstance, store) {
 		t.is(ticker.symbol, 'ETHUSD')
 	});
 
-	test('Authenticate and get balance', async t => {
+	test(`${exchange} - Authenticate and get balance`, async t => {
 		// Some exchange will return the balance immediatley after auth.
 		// Setup a promise before auth ensure we can catch the balance before it
 		// fall through
 		const balance = exchangeInstance.waitFor('balance');
 
-        const creds = await store.init();
+		const creds = await store.init();
 
 		await exchangeInstance.authenticate(store.credential[exchange])
 

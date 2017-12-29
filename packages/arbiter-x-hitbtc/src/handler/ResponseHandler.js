@@ -44,7 +44,7 @@ export default class ResponseHandler {
 		}
 
 		if(error) {
-			this.event.emit('error', error)
+			this.event.emit('error', {error})
 		} else {
 			this[id](result)
 		}

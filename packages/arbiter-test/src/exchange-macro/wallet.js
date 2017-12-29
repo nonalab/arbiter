@@ -2,16 +2,16 @@ import test from 'ava';
 
 export default function (exchange, exchangeInstance, store) {
 	test.before(async t => {
-		exchangeInstance
-			.on('error', console.error)
+		// exchangeInstance
+		// 	.on('other', otherListener)
+		// .on('error', console.error)
 		// grab otherListener from arbiter-util if needed
-		// .on('other', otherListener)
 
 		await exchangeInstance.open()
 
-        const creds = await store.init();
+		const creds = await store.init();
 
-        await exchangeInstance.authenticate(store.credential[exchange])
+		await exchangeInstance.authenticate(store.credential[exchange])
 
 		exchangeInstance.subscribeToReports()
 	});
@@ -21,9 +21,31 @@ export default function (exchange, exchangeInstance, store) {
 	});
 
 
-	test('Check wallet info', async t => {
-		const balance = await exchangeInstance.get('trading/balance', JSON.stringify({}))
+	test(`${exchange} - Get ETH Deposit Wallet Address`, async t => {
+		const data = await Promise.race([
+			exchangeInstance.requestDepositAddress(),
+			exchangeInstance.waitFor('error')
+		])
 
-        console.log(balance);
+		if(data.error) {
+			t.fail(JSON.stringify(data))
+		}
+
+		t.not(data, null)
+	});
+
+	test(`${exchange} - Deposit ETH to LAB's Wallet`, async t => {
+		const data = await Promise.race([
+			exchangeInstance.requestWithdrawCrypto({
+				// serious: true
+			}),
+			exchangeInstance.waitFor('error')
+		])
+
+		if (data.error) {
+			t.fail(JSON.stringify(data))
+		}
+
+		t.not(data, null)
 	});
 }

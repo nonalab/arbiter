@@ -21,7 +21,7 @@ export default function (exchange, exchangeInstance, store) {
 	});
 
 
-	test('Create and cancel BUY order', async t => {
+	test(`${exchange} - Create and Cancel BUY order`, async t => {
 		await exchangeInstance.requestBuyOrder({
 			price: 10
 		})
@@ -40,7 +40,7 @@ export default function (exchange, exchangeInstance, store) {
 	});
 
 
-	test('Create and cancel SELL order', async t => {
+	test(`${exchange} - Create and Cancel SELL order`, async t => {
 		await exchangeInstance.requestSellOrder({
 			price: 10000
 		})

@@ -101,10 +101,12 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 	}
 
 	async requestBuyOrder({
-		symbol = 'ETHUSD',
+		pair = ['EOS', 'ETH'],
 		quantity = 0.04,
 		price = 0
 	}) {
+		const symbol = pair.join('')
+
 		const params = this.makeOrderParams(`t${symbol}`, `${quantity}`, price)
 
 		this.send([0, "on", null, params])
@@ -113,10 +115,12 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 	}
 
 	async requestSellOrder({
-		symbol = 'ETHUSD',
+		pair = ['EOS', 'ETH'],
 		quantity = 0.04,
 		price = 0
 	}) {
+		const symbol = pair.join('')
+
 		const params = await this.makeOrderParams(`t${symbol}`, `${-1 * quantity}`, price)
 
 		this.send([0, "on", null, params])

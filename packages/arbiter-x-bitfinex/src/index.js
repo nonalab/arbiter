@@ -70,11 +70,11 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 	}
 
 	/* Streaming APIs: */
-	subscribeToTicker(symbol = 'ETHUSD') {
+	subscribeToTicker(pair = ['EOS', 'ETH']) {
 		this.send({
 			event: 'subscribe',
 			channel: 'ticker',
-			symbol: `t${symbol}`,
+			symbol: `t${pair.join('')}`,
 		})
 	}
 
@@ -111,12 +111,21 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 
 		this.send([0, "on", null, params])
 
-		return params;
+		const data = await Promise.race([
+			this.waitFor('order'),
+			this.waitFor('error')
+		])
+
+		if (data.error) {
+			return null
+		}
+
+		return data
 	}
 
 	async requestSellOrder({
 		pair = ['EOS', 'ETH'],
-		quantity = 0.04,
+		quantity = 2.0,
 		price = 0
 	}) {
 		const symbol = pair.join('')
@@ -125,13 +134,23 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 
 		this.send([0, "on", null, params])
 
-		return params;
+		const data = await Promise.race([
+			this.waitFor('order'),
+			this.waitFor('error')
+		])
+
+		if (data.error) {
+			return null
+		}
+
+		return data
 	}
 
 	requestCancelOrder(id) {
 		this.send([0, 'oc', null, {
 			id
 		}])
+		return this.waitFor('order')
 	}
 
 	requestTradingBalance() {}

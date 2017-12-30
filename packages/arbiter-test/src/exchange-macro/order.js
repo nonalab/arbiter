@@ -9,9 +9,9 @@ export default function (exchange, exchangeInstance, store) {
 
 		await exchangeInstance.open()
 
-        const creds = await store.init();
+		const creds = await store.init();
 
-        await exchangeInstance.authenticate(store.credential[exchange])
+		await exchangeInstance.authenticate(store.credential[exchange])
 
 		exchangeInstance.subscribeToReports()
 	});
@@ -22,17 +22,19 @@ export default function (exchange, exchangeInstance, store) {
 
 
 	test(`${exchange} - Create and Cancel BUY order`, async t => {
-		await exchangeInstance.requestBuyOrder({
-			price: 10
-		})
 
-		const order = await exchangeInstance.waitFor('order')
+		const order = await exchangeInstance.requestBuyOrder({
+			pair: ['ETH', 'USD'],
+			price: 0.1
+		})
 
 		t.is(order.status, 'ACTIVE')
 
-		exchangeInstance.requestCancelOrder(order.id)
+		const canceledOrder = await exchangeInstance.requestCancelOrder(order.id)
 
-		const canceledOrder = await exchangeInstance.waitFor('order')
+		if (!canceledOrder) {
+			t.fail()
+		}
 
 		t.is(canceledOrder.status, 'CANCELED')
 
@@ -41,17 +43,18 @@ export default function (exchange, exchangeInstance, store) {
 
 
 	test(`${exchange} - Create and Cancel SELL order`, async t => {
-		await exchangeInstance.requestSellOrder({
+		const order = await exchangeInstance.requestSellOrder({
+			pair: ['EOS', 'ETH'],
 			price: 10000
 		})
 
-		const order = await exchangeInstance.waitFor('order')
-
 		t.is(order.status, 'ACTIVE')
 
-		exchangeInstance.requestCancelOrder(order.id)
+		const canceledOrder = await exchangeInstance.requestCancelOrder(order.id)
 
-		const canceledOrder = await exchangeInstance.waitFor('order')
+		if (!canceledOrder) {
+			t.fail()
+		}
 
 		t.is(canceledOrder.status, 'CANCELED')
 

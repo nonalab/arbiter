@@ -15,11 +15,11 @@ export default function (exchange, exchangeInstance, store) {
 	})
 
 	test(`${exchange} - Subscribe to Ticker`, async t => {
-		exchangeInstance.subscribeToTicker('ETHUSD')
+		exchangeInstance.subscribeToTicker()
 
 		const ticker = await exchangeInstance.waitFor('ticker')
 
-		t.is(ticker.symbol, 'ETHUSD')
+		t.is(ticker.symbol, 'EOSETH')
 	});
 
 	test(`${exchange} - Authenticate and get balance`, async t => {

@@ -8,14 +8,14 @@ import ArbiterStore from 'arbiter-store';
 const store = new ArbiterStore(['credential'])
 
 const exchanges = [
-    'hitbtc',
-    // 'bitfinex'
+    // 'hitbtc',
+    'bitfinex'
 ]
 
 const exchangeTests = [
     // 'auth',
-    // 'order',
-	'wallet'
+    'order',
+	// 'wallet'
 ].map(getExchangeMacro)
 
 exchanges.map((exchange) => {

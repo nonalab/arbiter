@@ -18,9 +18,9 @@ import {
 const store = new ArbiterStore(['credential'])
 
 const exchange =
-	'hitbtc'
-// 'bitfinex'
-// 'bitgrail'
+	// 'hitbtc'
+	'bitfinex'
+	// 'bitgrail'
 
 const exchangeClass = getExchangeClass(exchange)
 
@@ -43,21 +43,21 @@ async function run() {
 
 	exchangeInstance.subscribeToReports()
 
-	// const buyOrder = await exchangeInstance.requestBuyOrder({
-	// 	// price: 10
-	// })
-    //
-	// if (!buyOrder || buyOrder.error) {
-	// 	taggedLog('ERROR', 'BUY ORDER FAILED');
-	// 	return process.exit(2);
-	// }
+	const buyOrder = await exchangeInstance.requestBuyOrder({
+		// price: 10
+	})
+
+	if (!buyOrder || buyOrder.error) {
+		taggedLog('ERROR', 'BUY ORDER FAILED');
+		return process.exit(2);
+	}
 
 	const sellOrder = await exchangeInstance.requestSellOrder({
 		// price: 10
 		quantity: 0.06
 	})
 
-	if (!sellOrder || sellOrder.error) {
+	if(!sellOrder || sellOrder.error) {
 		taggedLog('ERROR', 'SELL ORDER FAILED');
 		return process.exit(2);
 	}

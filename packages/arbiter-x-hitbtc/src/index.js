@@ -133,11 +133,11 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		})
 	}
 
-	subscribeToTicker(symbol = 'ETHUSD') {
+	subscribeToTicker(pair = ['EOS', 'ETH']) {
 		this.send({
 			method: 'subscribeTicker',
 			params: {
-				symbol
+				symbol : pair.join('')
 			}
 		})
 	}
@@ -273,6 +273,8 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 				clientOrderId
 			}
 		})
+
+		return this.waitFor('order')
 	}
 
 	requestTradingBalance() {

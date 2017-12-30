@@ -12,6 +12,10 @@
     Open Source Crypto Arbitrage Platform
 </h2>
 
+# Goal
+
+Arbiter aims to become a fully autonomous trading software. Internally, it implements a plugin system for each exchange that exposes a standard API for BUY, SELL and WITHDRAW crypto currency. This allows the core module to interact with each exchange using the same API invocation.
+
 # Setup
 
 The following prerequiste must be met:
@@ -36,9 +40,17 @@ $ lerna run start
 
 # Notes
 
+- As of 2017-12-30T12:40:04.120Z, arbiter is **NOT FUNCTIONAL** and thus **NOT PROFITABLE**. It will only update price ticker into the store. The reason being BitFinex requires `email` verification upon withdrawal.
+
+- As of 2017-12-30T12:39:56.697Z, the bot has 2 functional exchange module, one for HitBTC and one for BitFinex. However, extending the bot to support more exchange should be trivial. Please make a PR if you do!
+
+- Due to high traffic, BitFinex will reverse-throttle withdrawal. E.g, minimum withdrawal is $250.
+
 - Most design question should have an answer in the rfcs  `documentations/rfcs`. Please submit an issue if you think a specification is missing.
 
-- This project was initialized in 7 days between Dec 22 2017 and Dec 30 2017 by Joe Johans. (Commit `d1f855b8040d209e4c25e3e9efdb9b0f2dea7529` -> `eeea5a2343f6d2cb72e36734f3a5c7a935af98f5`). Please submit an issue if you spotted a piece of cancerous code. Jojo is human after all...
+- This project was initialized in 7 days between Dec 22 2017 and Dec 30 2017 by Joe Johans. (Commit `d1f855b8040d209e4c25e3e9efdb9b0f2dea7529` -> `eeea5a2343f6d2cb72e36734f3a5c7a935af98f5`). Please submit an issue if you spotted any piece of cancerous code. Jojo is human after all..
+
+- Experiment with Arbiter **AT YOUR OWN RISK**. And please help improve it by submitting issue or pull request!
 
 # Donation
 

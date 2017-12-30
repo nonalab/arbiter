@@ -19,7 +19,6 @@
         "arbiter-util": "^1.0.0",
         "bufferutil": "^3.0.3",
         "node-fetch": "^1.7.3",
-        "socket.io-client": "^2.0.4",
         "utf-8-validate": "^4.0.0",
         "ws": "^3.3.1"
     }

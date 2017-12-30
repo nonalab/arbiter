@@ -1,0 +1,8 @@
+{
+    "fiat": "ETH",
+    "target": [
+        "BTC",
+        "BCH",
+        "ZEC"
+    ]
+}

@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 
-import socketIoClient from 'socket.io-client';
+import WebSocket from 'ws';
 
 import crypto from 'crypto';
 
@@ -11,7 +11,6 @@ import {
 	generateRandomBytesHex
 } from 'arbiter-util';
 
-
 export default class ArbiterExchangeBitGrail extends EventEmitter {
 
 	constructor(wsUrl = 'wss://ws.bitgrail.com', restUrl = '') {
@@ -19,8 +18,8 @@ export default class ArbiterExchangeBitGrail extends EventEmitter {
 
 		this.restUrl = restUrl;
 
-		const wsClient = this.wsClient = socketIoClient(wsUrl, {
-			secure: true
+		const wsClient = this.wsClient = new WebSocket(wsUrl, {
+			perMessageDeflate: false
 		});
 
 		// Handle message and ping the appropriate
@@ -33,11 +32,12 @@ export default class ArbiterExchangeBitGrail extends EventEmitter {
 			this.emit('other', respJSON)
 		})
 
-		wsClient.on('connect', () => this.emit('open'))
+		wsClient.on('open', () => this.emit('open'))
 		wsClient.on('disconnect', () => this.emit('close'))
 		wsClient.on('error', (error) => this.emit('error', {
 			error
 		}))
+
 	}
 
 	/* Waiting Coroutine */

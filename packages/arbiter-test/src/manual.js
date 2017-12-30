@@ -30,16 +30,21 @@ async function run() {
 	const exchangeInstance = new exchangeClass()
 
 	exchangeInstance
+		.on('connect', otherListener)
 		.on('balance', balanceListener)
 		.on('other', otherListener)
 		.on('error', console.error)
 	// grab otherListener from arbiter-util if needed
 
+	console.log('Openning...');
+
 	await exchangeInstance.open()
 
 	const creds = await store.init();
 
-	await exchangeInstance.authenticate(store.credential[exchange])
+	console.log('Initialized');
+
+	// await exchangeInstance.authenticate(store.credential[exchange])
 
 	exchangeInstance.subscribeToReports()
 

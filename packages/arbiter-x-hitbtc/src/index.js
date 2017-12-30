@@ -3,8 +3,6 @@ import WebSocket from 'ws';
 
 import crypto from 'crypto';
 
-import base64 from 'base-64';
-
 import fetch from 'node-fetch';
 
 import {
@@ -74,7 +72,6 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		}
 	}
 
-	/* */
 	async open() {
 		return this.waitFor('open')
 	}
@@ -137,7 +134,7 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		this.send({
 			method: 'subscribeTicker',
 			params: {
-				symbol : pair.join('')
+				symbol: pair.join('')
 			}
 		})
 	}
@@ -157,7 +154,7 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 			type
 		})
 
-		if (!resp) {
+		if(!resp) {
 			return null
 		}
 
@@ -289,11 +286,15 @@ export default class ArbiterExchangeHitBTC extends EventEmitter {
 		key,
 		secret
 	}) {
+
+		const basicAuthKey = new Buffer(`${key}:${secret}`)
+			.toString('base64')
+
 		this.restHeaders = {
 			'Accept': 'application/json',
 			'Content-Type': 'application/json',
 			'Connection': 'Keep-Alive',
-			'Authorization': 'Basic ' + base64.encode(`${key}:${secret}`)
+			'Authorization': `Basic ${basicAuthKey}`
 		}
 
 		const id = 'auth';

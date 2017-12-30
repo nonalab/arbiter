@@ -17,7 +17,6 @@
     "dependencies": {
         "arbiter-model": "^1.0.0",
         "arbiter-util": "^1.0.0",
-        "base-64": "^0.1.0",
         "bufferutil": "^3.0.3",
         "node-fetch": "^1.7.3",
         "utf-8-validate": "^4.0.0",

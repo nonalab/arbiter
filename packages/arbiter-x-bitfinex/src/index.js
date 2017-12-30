@@ -1,7 +1,9 @@
 import EventEmitter from 'events';
 import WebSocket from 'ws';
 
-import crypto from 'crypto-js';
+import crypto from 'crypto';
+
+import fetch from 'node-fetch';
 
 import {
 	generateRandomInt
@@ -13,10 +15,12 @@ import AuthenticatedChannelHandler from './handler/AuthenticatedChannelHandler';
 
 export default class ArbiterExchangeBitFinex extends EventEmitter {
 
-	constructor(baseUrl = 'wss://api.bitfinex.com/ws/2') {
+	constructor(wsUrl = 'wss://api.bitfinex.com/ws/2', restUrl = 'https://api.bitfinex.com/v1') {
 		super()
 
-		const wsClient = this.wsClient = new WebSocket(baseUrl, {
+		this.restUrl = restUrl;
+
+		const wsClient = this.wsClient = new WebSocket(wsUrl, {
 			perMessageDeflate: false
 		});
 
@@ -69,7 +73,67 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 		this.wsClient.send(JSON.stringify(socketMessage))
 	}
 
+	async rest(route, data) {
+		try {
+			const {
+				restUrl,
+				key,
+				secret
+			} = this;
+
+			const nonce = Date.now()
+				.toString()
+
+			const body = JSON.stringify({
+				request: `/${route}`,
+				nonce
+			})
+
+			const payload = new Buffer(body)
+				.toString('base64')
+
+			const signature = crypto.createHmac('sha384', secret)
+				.update(payload)
+				.digest('hex');
+
+			const headers = {
+				'X-BFX-APIKEY': key,
+				'X-BFX-PAYLOAD': payload,
+				'X-BFX-SIGNATURE': signature
+			}
+
+			const resp = await fetch(`${restUrl}/${route}`, {
+				method: 'POST',
+				headers,
+				body
+			})
+
+			const respJSON = await resp.json()
+
+			if(respJSON.error) {
+				throw(respJSON.error)
+			} else {
+				return respJSON
+			}
+		} catch(error) {
+			this.emit('error', {
+				error
+			})
+			return null
+		}
+	}
+
+	async get(route) {
+		return this.rest(route)
+	}
+
+	async post(route, body) {
+		return this.rest(route, body)
+	}
+
 	/* Streaming APIs: */
+	subscribeToReports() {}
+
 	subscribeToTicker(pair = ['EOS', 'ETH']) {
 		this.send({
 			event: 'subscribe',
@@ -77,8 +141,6 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 			symbol: `t${pair.join('')}`,
 		})
 	}
-
-	subscribeToReports() {}
 
 	/* REST-like APIs: */
 	makeOrderParams(symbol, amount, price) {
@@ -116,7 +178,7 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 			this.waitFor('error')
 		])
 
-		if (data.error) {
+		if(data.error) {
 			return null
 		}
 
@@ -139,7 +201,7 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 			this.waitFor('error')
 		])
 
-		if (data.error) {
+		if(data.error) {
 			return null
 		}
 
@@ -159,7 +221,8 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 		key,
 		secret
 	}) {
-		const self = this;
+		this.key = key;
+		this.secret = secret;
 
 		const event = 'auth';
 
@@ -174,9 +237,9 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 			'balance'
 		]
 
-		const signature = crypto
-			.HmacSHA384(payload, secret)
-			.toString(crypto.enc.Hex)
+		const signature = crypto.createHmac('sha384', secret)
+			.update(payload)
+			.digest('hex');
 
 		this.send({
 			event,

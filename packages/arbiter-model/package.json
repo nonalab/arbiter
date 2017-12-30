@@ -1,6 +1,6 @@
 {
   "name": "arbiter-model",
-  "version": "1.0.0",
+  "version": "1.0.0-0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -9,13 +9,13 @@
   },
   "keywords": [],
   "author": "@louisgv",
-  "license" : "SEE LICENSE IN ../../LICENSE",
+  "license": "SEE LICENSE IN ../../LICENSE",
   "devDependencies": {
     "ava": "^0.24.0",
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.6.1"
   },
   "dependencies": {
-    "arbiter-util": "^1.0.0"
+    "arbiter-util": "^1.0.0-0"
   }
 }

@@ -1,6 +1,6 @@
 {
     "name": "arbiter-x-bitgrail",
-    "version": "1.0.0",
+    "version": "1.0.0-0",
     "description": "",
     "main": "index.js",
     "scripts": {
@@ -15,8 +15,8 @@
         "babel-preset-env": "^1.6.1"
     },
     "dependencies": {
-        "arbiter-model": "^1.0.0",
-        "arbiter-util": "^1.0.0",
+        "arbiter-model": "^1.0.0-0",
+        "arbiter-util": "^1.0.0-0",
         "bufferutil": "^3.0.3",
         "node-fetch": "^1.7.3",
         "utf-8-validate": "^4.0.0",

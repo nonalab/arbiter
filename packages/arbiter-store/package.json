@@ -1,6 +1,6 @@
 {
   "name": "arbiter-store",
-  "version": "1.0.0",
+  "version": "1.0.0-0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,13 +8,13 @@
   },
   "keywords": [],
   "author": "@louisgv",
-  "license" : "SEE LICENSE IN ../../LICENSE",
+  "license": "SEE LICENSE IN ../../LICENSE",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.6.1"
   },
   "dependencies": {
-    "arbiter-util": "^1.0.0",
+    "arbiter-util": "^1.0.0-0",
     "fs-extra": "^4.0.2"
   }
 }

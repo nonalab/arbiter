@@ -1,6 +1,6 @@
 {
   "name": "arbiter-core",
-  "version": "1.0.0",
+  "version": "1.0.0-0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -16,12 +16,12 @@
     "babel-preset-env": "^1.6.1"
   },
   "dependencies": {
-    "arbiter-model": "^1.0.0",
-    "arbiter-store": "^1.0.0",
-    "arbiter-util": "^1.0.0",
-    "arbiter-x-bitfinex": "^1.0.0",
-    "arbiter-x-bitgrail": "^1.0.0",
-    "arbiter-x-hitbtc": "^1.0.0",
+    "arbiter-model": "^1.0.0-0",
+    "arbiter-store": "^1.0.0-0",
+    "arbiter-util": "^1.0.0-0",
+    "arbiter-x-bitfinex": "^1.0.0-0",
+    "arbiter-x-bitgrail": "^1.0.0-0",
+    "arbiter-x-hitbtc": "^1.0.0-0",
     "bufferutil": "^3.0.3",
     "chokidar-cli": "^1.2.0",
     "fs-extra": "^4.0.2",

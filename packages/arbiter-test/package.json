@@ -1,6 +1,6 @@
 {
   "name": "arbiter-test",
-  "version": "1.0.0",
+  "version": "1.0.0-0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -20,12 +20,12 @@
     "babel-register": "^6.26.0"
   },
   "dependencies": {
-    "arbiter-model": "^1.0.0",
-    "arbiter-store": "^1.0.0",
-    "arbiter-util": "^1.0.0",
-    "arbiter-x-bitfinex": "^1.0.0",
-    "arbiter-x-bitgrail": "^1.0.0",
-    "arbiter-x-hitbtc": "^1.0.0",
+    "arbiter-model": "^1.0.0-0",
+    "arbiter-store": "^1.0.0-0",
+    "arbiter-util": "^1.0.0-0",
+    "arbiter-x-bitfinex": "^1.0.0-0",
+    "arbiter-x-bitgrail": "^1.0.0-0",
+    "arbiter-x-hitbtc": "^1.0.0-0",
     "bufferutil": "^3.0.3",
     "crypto-js": "^3.1.9-1",
     "utf-8-validate": "^3.0.4",

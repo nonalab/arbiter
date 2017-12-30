@@ -10,7 +10,7 @@
   },
   "keywords": [],
   "author": "@louisgv",
-  "license" : "SEE LICENSE IN ../../LICENSE",
+  "license": "SEE LICENSE IN ../../LICENSE",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.6.1"
@@ -20,6 +20,7 @@
     "arbiter-store": "^1.0.0",
     "arbiter-util": "^1.0.0",
     "arbiter-x-bitfinex": "^1.0.0",
+    "arbiter-x-bitgrail": "^1.0.0",
     "arbiter-x-hitbtc": "^1.0.0",
     "bufferutil": "^3.0.3",
     "chokidar-cli": "^1.2.0",

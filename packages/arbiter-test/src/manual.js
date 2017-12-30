@@ -19,8 +19,8 @@ const store = new ArbiterStore(['credential'])
 
 const exchange =
 	// 'hitbtc'
-	'bitfinex'
-// 'bitgrail'
+	// 'bitfinex'
+	'bitgrail'
 
 const exchangeClass = getExchangeClass(exchange)
 
@@ -45,7 +45,7 @@ async function run() {
 
 	// await testWithdraw(exchangeInstance)
 
-	// console.log('MANUAL RUN DONE');
+	console.log('MANUAL RUN DONE');
 
 	// return process.exit(0);
 }

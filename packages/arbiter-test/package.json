@@ -10,8 +10,8 @@
   },
   "keywords": [],
   "author": "@louisgv",
-   "license" : "SEE LICENSE IN ../../LICENSE",
-   "devDependencies": {
+  "license": "SEE LICENSE IN ../../LICENSE",
+  "devDependencies": {
     "ava": "^0.24.0",
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
@@ -24,6 +24,7 @@
     "arbiter-store": "^1.0.0",
     "arbiter-util": "^1.0.0",
     "arbiter-x-bitfinex": "^1.0.0",
+    "arbiter-x-bitgrail": "^1.0.0",
     "arbiter-x-hitbtc": "^1.0.0",
     "bufferutil": "^3.0.3",
     "crypto-js": "^3.1.9-1",

@@ -14,6 +14,20 @@
 
 # Setup
 
+The following prerequiste must be met:
+- yarn@latest
+- node@9
+- lerna@latest
+
+
+Then to run, simply:
+
+```
+lerna bootstrap
+lerna run build
+lerna run start
+```
+
 # Notes
 
 - Most design question should have an answer in the rfcs  `documentations/rfcs`. Please submit an issue if you think a specification is missing.

@@ -27,6 +27,10 @@ export default class AuthenticatedChannelHandler {
 		this.event.emit('balance', validBalances)
 	}
 
+	balanceUpdate(data) {
+		this.event.emit(`balance-update`, new Balance(data))
+	}
+
 	order(data) {
 		this.event.emit('order', new Order(data))
 	}
@@ -47,6 +51,9 @@ export default class AuthenticatedChannelHandler {
 		case 'ws':
 			this.event.emit('auth')
 			this.balance(data)
+			return true
+		case 'wu':
+			this.balanceUpdate(data)
 			return true
 		case 'os':
 			this.orders(data)

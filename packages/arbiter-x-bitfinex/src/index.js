@@ -13,10 +13,20 @@ import PublicChannelHandler from './handler/PublicChannelHandler';
 
 import AuthenticatedChannelHandler from './handler/AuthenticatedChannelHandler';
 
+const currencyNameMap = {
+	'ETH': 'ethereum',
+	'BTC': 'bitcoin',
+	'LTC': 'litecoin',
+	'ZEC': 'zcash',
+	'BCH': 'bcash'
+}
+
 export default class ArbiterExchangeBitFinex extends EventEmitter {
 
 	constructor(wsUrl = 'wss://api.bitfinex.com/ws/2', restUrl = 'https://api.bitfinex.com/v1') {
 		super()
+
+		this.wallet = {}
 
 		this.restUrl = restUrl;
 
@@ -27,7 +37,6 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 		const publicChannelHandler = new PublicChannelHandler(this);
 
 		const authenticatedChannelHandler = new AuthenticatedChannelHandler(this);
-
 
 		// Handle message and ping the appropriate
 		// litener from the container
@@ -50,13 +59,44 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 		wsClient.on('open', () => this.emit('open'))
 		wsClient.on('close', () => this.emit('close'))
 		wsClient.on('error', (error) => this.emit('error', error))
+
+		this.once('balance', this.initLocalWallet)
+
+		this.on('balance-update', this.updateLocalWallet)
 	}
 
+	initLocalWallet(balances) {
+		balances.map((balance) => {
+			this.wallet[balance.currency] = balance
+		})
+	}
+
+	updateLocalWallet(balance) {
+		this.wallet[balance.currency] = balance
+	}
+
+	/* Waiting Coroutine */
 	async waitFor(eventName) {
 		const self = this;
 		return new Promise(function (resolve, reject) {
 			self.once(eventName, resolve)
 		});
+	}
+
+	async waitForWalletUpdate(
+		currentAmount, targetDiff, currency, withdrawal = true
+	) {
+		const updatedBalance = await this.waitFor('balance-update');
+
+		if(updatedBalance.currency !== currency) {
+			return waitForWalletUpdate(currentAmount, targetDiff, currency, withdrawal = true)
+		}
+
+		const diff = Math.abs(currentAmount - updatedBalance.available);
+
+		if(diff < targetDiff) {
+			return waitForWalletUpdate(currentAmount, targetDiff, currency, withdrawal = true);
+		}
 	}
 
 	async open() {
@@ -85,8 +125,9 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 				.toString()
 
 			const body = JSON.stringify({
-				request: `/${route}`,
-				nonce
+				request: `/v1/${route}`,
+				nonce,
+				...data
 			})
 
 			const payload = new Buffer(body)
@@ -110,11 +151,7 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 
 			const respJSON = await resp.json()
 
-			if(respJSON.error) {
-				throw(respJSON.error)
-			} else {
-				return respJSON
-			}
+			return respJSON
 		} catch(error) {
 			this.emit('error', {
 				error
@@ -143,23 +180,56 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 	}
 
 	/* REST-like APIs: */
-	makeOrderParams(symbol, amount, price) {
-		const cid = generateRandomInt(36)
 
-		const params = {
-			cid,
-			symbol,
-			amount
+	async requestDepositAddress(currency = 'ETH') {
+		const method = currencyNameMap[currency];
+
+		const data = await this.post(`deposit/new`, {
+			method: currencyNameMap[currency],
+			'wallet_name': 'exchange'
+		})
+
+		if(!data || !data.address || data.result === 'error') {
+			this.emit('error', {
+				error: data
+			})
+
+			return null
 		}
 
-		if(!price) {
-			params.type = 'EXCHANGE MARKET'
-		} else {
-			params.type = 'EXCHANGE LIMIT'
-			params.price = '' + price
+		return data.address;
+	}
+
+	async requestWithdrawCrypto({
+		currency = 'ETH',
+		amount = 0.5,
+		address = '0x74D5bCAF1ec7CF4BFAF4bb67D51D00dD821c5bF6',
+		serious = false
+	}) {
+		if(!serious) {
+			return null
+		}
+		// Send from main wallet to the designated
+		const data = await this.post(`withdraw`, {
+			'withdraw_type': currencyNameMap[currency],
+			'walletselected': 'exchange',
+			address,
+			amount: amount + '',
+		})
+
+		if(!data || data[0].result !== 'success') {
+			this.emit('error', {
+				error: data[0]
+			})
+
+			return null
 		}
 
-		return params;
+		const currentAmount = this.wallet[currency]
+
+		await waitForWalletUpdate(currentAmount, amount, currency)
+
+		return data[0];
 	}
 
 	async requestBuyOrder({
@@ -253,4 +323,23 @@ export default class ArbiterExchangeBitFinex extends EventEmitter {
 		return this.waitFor('auth')
 	}
 
+
+	makeOrderParams(symbol, amount, price) {
+		const cid = generateRandomInt(36)
+
+		const params = {
+			cid,
+			symbol,
+			amount
+		}
+
+		if(!price) {
+			params.type = 'EXCHANGE MARKET'
+		} else {
+			params.type = 'EXCHANGE LIMIT'
+			params.price = '' + price
+		}
+
+		return params;
+	}
 }

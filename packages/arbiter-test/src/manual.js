@@ -18,8 +18,8 @@ import {
 const store = new ArbiterStore(['credential'])
 
 const exchange =
-	'hitbtc'
-	// 'bitfinex'
+	// 'hitbtc'
+	'bitfinex'
 // 'bitgrail'
 
 const exchangeClass = getExchangeClass(exchange)
@@ -43,14 +43,14 @@ async function run() {
 
 	exchangeInstance.subscribeToReports()
 
-	// const data = await exchangeInstance.get('account_infos')
+	// await testWithdraw(exchangeInstance)
 
-	await testWithdraw(exchangeInstance)
+	// console.log('MANUAL RUN DONE');
 
-	console.log('MANUAL RUN DONE');
-
-	return process.exit(0);
+	// return process.exit(0);
 }
+
+
 
 async function testBuyAndSell(exchangeInstance) {
 	const buyOrder = await exchangeInstance.requestBuyOrder({
@@ -75,13 +75,16 @@ async function testBuyAndSell(exchangeInstance) {
 
 async function testWithdraw(exchangeInstance) {
 	const withdraw = await exchangeInstance.requestWithdrawCrypto({
-		serious: false
+		serious: true
 	})
 
 	if(!withdraw) {
 		return
 	}
 
-	const transactionStatus = await exchangeInstance.waitForTransaction(withdraw.id)
+	console.log(withdraw);
+
+	// const transactionStatus = await exchangeInstance.waitForTransaction(withdraw.id)
+
 	console.log('TRANSACTION COMPLETE!');
 }

@@ -19,20 +19,26 @@ The following prerequiste must be met:
 - node@9
 - lerna@latest
 
-
-Then to run, simply do:
-
+```sh
+$ git clone https://github.com/nonalab/arbiter
+$ cd arbiter
+$ lerna bootstrap
 ```
-lerna bootstrap
-lerna run build
-lerna run start
+
+Afterward, setup your credential in the `arbiter-store` module. First duplicate `dbz` into `db` directory inside `arbiter-store`, then fill out your API keys in `db/credentials`.
+
+Then you can run:
+
+```sh
+$ lerna run build
+$ lerna run start
 ```
 
 # Notes
 
 - Most design question should have an answer in the rfcs  `documentations/rfcs`. Please submit an issue if you think a specification is missing.
 
-- This project was initialized in 7 days between Dec 22 2017 and Dec 30 2017 by @louisgv. (Commit `d1f855b8040d209e4c25e3e9efdb9b0f2dea7529` -> `f0b159ff36fcce8d4e444d20844e2d2bfb23b2b2`).
+- This project was initialized in 7 days between Dec 22 2017 and Dec 30 2017 by Joe Johans. (Commit `d1f855b8040d209e4c25e3e9efdb9b0f2dea7529` -> `eeea5a2343f6d2cb72e36734f3a5c7a935af98f5`). Please submit an issue if you spotted a piece of cancerous code. Jojo is human after all...
 
 # Donation
 
@@ -50,4 +56,4 @@ All donation will be used to fund upcoming decentralized project running on top 
 
 # License
 
-Arbiter is licensed under a [MIT License](./LICENSE)
+Arbiter is licensed under a [MIT License](https://github.com/nonalab/arbiter/tree/master/LICENSE)

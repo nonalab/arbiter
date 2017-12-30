@@ -42,6 +42,8 @@ $ cd arbiter
 $ lerna bootstrap
 ```
 
+Afterward, setup your credential in the `arbiter-store` module. First duplicate `dbz` into `db` directory inside `arbiter-store`, then fill out your API keys in `db/credentials`.
+
 Then you can run:
 
 ```sh

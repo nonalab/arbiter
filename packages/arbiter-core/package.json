@@ -6,7 +6,7 @@
   "scripts": {
     "start": "babel-node src/index.js",
     "build": "babel src -d lib",
-    "test": "chokidar './src/**/*.js' -c 'npm start'"
+    "watch": "chokidar './src/**/*.js' -c 'npm start'"
   },
   "keywords": [],
   "author": "@louisgv",

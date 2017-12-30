@@ -20,7 +20,7 @@ The following prerequiste must be met:
 - lerna@latest
 
 
-Then to run, simply:
+Then to run, simply do:
 
 ```
 lerna bootstrap
